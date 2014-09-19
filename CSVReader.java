@@ -5,10 +5,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List; 
 import java.util.Scanner;
-import java.sql.Connection;
-import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.ArrayList;
 import java.sql.SQLException;
-
+import java.sql.PreparedStatement;
 
 class CSVReader {
 
@@ -19,14 +20,80 @@ class CSVReader {
 
 	public void insertCSVFile(final String fileName) throws IOException{
 		Path path = Paths.get(System.getProperty("user.dir") + "/" + fileName);
-
+		List<List<String>> content = new ArrayList<List<String>>(); //Whats the fastes list of them all?
+		
 		try (Scanner scanner = new Scanner(path,ENCODING.name())){
-
+			
 			while(scanner.hasNextLine()){
-				System.out.println(scanner.nextLine());
-
+				List<String> line = Arrays.asList(scanner.nextLine().split(","));
+				content.add(line);
 			}
 
+		}
+		System.out.println(content.get(0));
+
+		this.createTable(fileName, content.get(0));
+		this.insertValues(fileName, content);
+	}
+
+	//TODO: Santize tableName and other inputs
+	private void createTable(String tableName,List<String> headRow) {
+		DBController ct = DBController.getInstance();
+		ct.initDBConnection();
+		tableName = tableName.replace(".","");
+		String createString = "CREATE TABLE "+ tableName + "(";   
+		Iterator<String> iter = headRow.iterator();
+
+		while (iter.hasNext()){
+				createString += iter.next() + " INTEGER, "; 
+			}
+
+		createString = createString.substring(0,createString.length()-2);
+		createString += ")";
+		
+		try {
+			PreparedStatement stmt = ct.getStatement("DROP TABLE IF EXISTS " + tableName);
+			stmt.executeUpdate();
+			stmt = ct.getStatement(createString);
+			stmt.executeUpdate();
+		}
+		catch(SQLException e){
+			System.out.println(e);
+		}
+	}
+	//TODO: Santize tableName and other inputs
+	private void insertValues(String tableName, List<List<String>> values) {
+		DBController ct =DBController.getInstance();
+		ct.initDBConnection();
+		tableName = tableName.replace(".","");
+		String insertString = "INSERT INTO " + tableName + " VALUES(";
+
+		for (int i = 0 ; i < values.get(0).size(); i++) {
+			insertString += "?,";
+		}
+
+		insertString = insertString.substring(0,insertString.length()-1);
+		insertString += ")";
+		System.out.println(insertString); 
+
+		Iterator<List<String>> iterList = values.iterator();
+		iterList.next(); //Removes the first list with the column names
+		try {
+			PreparedStatement stmt = ct.getStatement(insertString);
+			while (iterList.hasNext()){
+				Iterator<String> iterValues = iterList.next().iterator();
+				int i = 1; 
+				while (iterValues.hasNext()){
+					stmt.setString(i,iterValues.next());
+					i += 1;
+				}
+				stmt.addBatch();
+			}
+			stmt.executeBatch(); 
+		}
+
+		catch(SQLException e){
+			System.out.println(e);
 		}
 	}
 

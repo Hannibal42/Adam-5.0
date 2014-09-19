@@ -1,9 +1,9 @@
 import java.sql.*;
-
+/* The DBController class is used to manage the DBConnection and takes all the sql query */
 
 class DBController {
 
-	private static final String DB_NAME = "Ergebnisse.db";
+	private static final String DB_NAME = "Ergebnisse.db"; // This should be more flexibel
 	private static final DBController dbcontroller = new DBController();
 	private static Connection connection;
 	private static final String DB_PATH = System.getProperty("user.dir") + "/" + DB_NAME;  //Gets the current working folder 
@@ -12,7 +12,6 @@ class DBController {
 	static {
 		try {
 			Class.forName("org.sqlite.JDBC");
-			System.out.println(DB_PATH);
 		}
 		catch (ClassNotFoundException e){
 			System.err.println("Fehler beim Laden des JDBC-Treibers");
@@ -40,7 +39,7 @@ class DBController {
 			throw new RuntimeException(e);
 		}
 
- 		//Closes the connection when the runtime is terminated
+ 		//Creates a Thread that closes the DB Connection, runs when the Runtime is shutdown 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run(){
 				try {
@@ -56,16 +55,19 @@ class DBController {
 			}
 		});
 	}
+	
+	public PreparedStatement getStatement(String query) throws SQLException{
+			return connection.prepareStatement(query);
+	}
 
+	//Is there a better way to do this?
 	public void execute(String query){
-		try{
+		try {
 			Statement stmt = connection.createStatement();
-			stmt.executeUpdate("DROP TABLE IF EXISTS test;");
-			stmt.executeUpdate("CREATE TABLE test(test1,test2);");
-			connection.close();
+			stmt.executeUpdate(query);
 		}
 		catch(SQLException e){
-			System.out.println(e);
+			System.out.println(e); //Maybe add some loging here
 		}
 
 	}
