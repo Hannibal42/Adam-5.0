@@ -60,6 +60,14 @@ class DBController {
 			return connection.prepareStatement(query);
 	}
 
+	public void setAutoCommit(Boolean mode) throws SQLException{
+		connection.setAutoCommit(mode);
+	}
+
+	public void commit() throws SQLException{
+		connection.commit();
+	}
+
 	//Is there a better way to do this?
 	public void execute(String query){
 		try {

@@ -79,7 +79,10 @@ class CSVReader {
 		Iterator<List<String>> iterList = values.iterator();
 		iterList.next(); //Removes the first list with the column names
 		try {
+
 			PreparedStatement stmt = ct.getStatement(insertString);
+			ct.setAutoCommit(false);
+			
 			while (iterList.hasNext()){
 				Iterator<String> iterValues = iterList.next().iterator();
 				int i = 1; 
@@ -90,10 +93,18 @@ class CSVReader {
 				stmt.addBatch();
 			}
 			stmt.executeBatch(); 
+			ct.commit();
 		}
-
 		catch(SQLException e){
 			System.out.println(e);
+		}
+		finally{
+			try{
+				ct.setAutoCommit(true);
+			}
+			catch(SQLException e){
+				System.out.println(e);
+			}
 		}
 	}
 
