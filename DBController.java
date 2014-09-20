@@ -3,7 +3,7 @@ import java.sql.*;
 
 class DBController {
 
-	private static final String DB_NAME = "Ergebnisse.db"; // This should be more flexibel
+	private static final String DB_NAME = "Ergebnisse.db"; // TODO: This should be more flexibel
 	private static final DBController dbcontroller = new DBController();
 	private static Connection connection;
 	private static final String DB_PATH = System.getProperty("user.dir") + "/" + DB_NAME;  //Gets the current working folder 
@@ -68,14 +68,14 @@ class DBController {
 		connection.commit();
 	}
 
-	//Is there a better way to do this?
+	//Is there a better way to do this? TODO: I dont need this anymore
 	public void execute(String query){
 		try {
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate(query);
 		}
 		catch(SQLException e){
-			System.out.println(e); //Maybe add some loging here
+			System.out.println(e); //TODO:Maybe add some loging here
 		}
 
 	}

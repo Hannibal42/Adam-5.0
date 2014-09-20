@@ -18,8 +18,9 @@ class CSVReader {
 	public CSVReader(){
 	}
 
-	public void insertCSVFile(final String fileName) throws IOException{
-		Path path = Paths.get(System.getProperty("user.dir") + "/" + fileName);
+	public void insertCSVFile(final String pathString, final String tableName){
+		Path path = Paths.get(pathString);
+		//Path path = Paths.get(System.getProperty("user.dir") + "/" + fileName);
 		List<List<String>> content = new ArrayList<List<String>>(); //Whats the fastes list of them all?
 		
 		try (Scanner scanner = new Scanner(path,ENCODING.name())){
@@ -30,11 +31,22 @@ class CSVReader {
 			}
 
 		}
-		System.out.println(content.get(0));
+		catch (IOException e) {
+			System.out.println(e);
+		}
+		//System.out.println(content.get(0));
 
-		this.createTable(fileName, content.get(0));
-		this.insertValues(fileName, content);
+		this.createTable(tableName, content.get(0));
+		this.insertValues(tableName, content);
 	}
+
+	public void insertCSVFiles(final List<String> fileNames) throws IOException {
+		Iterator<String> iter = fileNames.iterator();
+		while (iter.hasNext()){
+			this.insertCSVFile(iter.next());
+		}
+	}
+
 
 	//TODO: Santize tableName and other inputs
 	private void createTable(String tableName,List<String> headRow) {
@@ -74,7 +86,7 @@ class CSVReader {
 
 		insertString = insertString.substring(0,insertString.length()-1);
 		insertString += ")";
-		System.out.println(insertString); 
+		//System.out.println(insertString); 
 
 		Iterator<List<String>> iterList = values.iterator();
 		iterList.next(); //Removes the first list with the column names
@@ -82,7 +94,7 @@ class CSVReader {
 
 			PreparedStatement stmt = ct.getStatement(insertString);
 			ct.setAutoCommit(false);
-			
+
 			while (iterList.hasNext()){
 				Iterator<String> iterValues = iterList.next().iterator();
 				int i = 1; 
@@ -108,9 +120,11 @@ class CSVReader {
 		}
 	}
 
-	public static void main(String[] args) throws IOException{
-		CSVReader reader = new CSVReader();
-		reader.insertCSVFile("b1.csv");
-	}
+
+
+	//public static void main(String[] args) throws IOException{
+	//	CSVReader reader = new CSVReader();
+	//	reader.insertCSVFile("b1.csv");
+	//}
 	
 }
