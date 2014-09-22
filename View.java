@@ -26,6 +26,7 @@ public class View extends Application{
 	public void start(Stage primaryStage) {
 		
 		GridPane grid = new GridPane();
+		File defaultDir = new File(System.getProperty("user.dir"));
 
 		grid.setAlignment(Pos.CENTER);
 		grid.setHgap(10);
@@ -37,8 +38,11 @@ public class View extends Application{
 		grid.add(scenetitle,0,0,2,1);
 
 		//Button for Data selection
+		
 		FileChooser dataChooser = new FileChooser();
 		dataChooser.setTitle("Select Data File");
+		dataChooser.setInitialDirectory(defaultDir);
+
 		
 		Button dataBtn = new Button("Select Data File");
 		grid.add(dataBtn,0,1);
@@ -57,6 +61,7 @@ public class View extends Application{
 			}
 
 		});		
+		
 	
 		//Button for Question selection
 		Button questionBtn = new Button("Select Questions");
