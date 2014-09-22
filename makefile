@@ -5,7 +5,7 @@
 #defines the java compiler
 JCC = javac
 
-#defines the compilation flags
+#defines the compilation flags, including the driver does not work
 JFlags = -g -classpath ".;sqlite-jdbc-3.7.2.jar"
 
 #typing 'make' invokes the first entry target in the makefile
@@ -17,4 +17,3 @@ DBController.class: DBController.java
 	$(JCC) $(JFlags) DBController.java
 CSVReader.class: CSVReader.java
 	$(JCC) $(JFlags) CSVReader.java
-

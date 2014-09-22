@@ -1,4 +1,4 @@
-package de.ifsr.adam;
+//package de.ifsr.adam;
 
 import java.io.IOException;
 import java.io.File;
