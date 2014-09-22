@@ -27,6 +27,7 @@ class DBController {
 	}
 
 	public void initDBConnection(){
+		
 		try {
 			if (connection != null)
 				return;

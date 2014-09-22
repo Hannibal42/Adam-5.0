@@ -25,7 +25,6 @@ public class View extends Application{
 	@Override
 	public void start(Stage primaryStage) {
 		
-
 		GridPane grid = new GridPane();
 
 		grid.setAlignment(Pos.CENTER);
@@ -37,12 +36,11 @@ public class View extends Application{
 		scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
 		grid.add(scenetitle,0,0,2,1);
 
-		
 		//Button for Data selection
 		FileChooser dataChooser = new FileChooser();
-		dataChooser.setTitle("Select Data");
+		dataChooser.setTitle("Select Data File");
 		
-		Button dataBtn = new Button("Select Data");
+		Button dataBtn = new Button("Select Data File");
 		grid.add(dataBtn,0,1);
 
 		TextField dataTextField = new TextField();
@@ -58,9 +56,8 @@ public class View extends Application{
 				}
 			}
 
-		});
-
-		
+		});		
+	
 		//Button for Question selection
 		Button questionBtn = new Button("Select Questions");
 		grid.add(questionBtn,0,2);
@@ -76,7 +73,6 @@ public class View extends Application{
 			}
 
 		});
-
 
 		//Button for Report selection
 		Button reportBtn = new Button("Select Report");
@@ -94,7 +90,6 @@ public class View extends Application{
 
 		});
 
-		
 		//Save Button bottom right corner. 
 		Button saveBtn = new Button("Save Diagram");
 		HBox hbSaveBtn = new HBox(10);
@@ -112,18 +107,20 @@ public class View extends Application{
 				actiontarget.setFill(Color.FIREBRICK);
 				actiontarget.setText("Diagrams generated.");
 				
-				if (dataTextField.getText().endsWith(".CSV") || dataTextField.getText().endsWith(".csv") ){
-					reader.insertCSVFile("test1",dataTextField.getText()); //TODO: Generate Tablename from file path
+				String filePath = dataTextField.getText();
+				if (reader.isFilePath(filePath)){
+					if(reader.isCSVFile(filePath)){
+						reader.insertCSVFile(filePath);
+					}
+					else{
+						dataTextField.setText("Not a CSV file!");
+					}
 				}
 				else {
-					dataTextField.setText("Not a csv File!");
+					dataTextField.setText("Not a valid file path!");
 				}
 			}
 		});
-
-
-
-
 
 		//grid.setGridLinesVisible(true);
 		Scene scene = new Scene(grid,300,275);
@@ -131,11 +128,6 @@ public class View extends Application{
 		primaryStage.setScene(scene);
 		//primaryStage.getStylesheets().add(Login.class.getResource("Adam.css").toExternalForm());  //TODO: Pimp my form!
 		primaryStage.show();
-	}
-
-	//TODO: Write a function that validates if a file realy exists.
-	private Boolean validatePath(String pathString){
-
 	}
 
 	public static void main(String[] args){
