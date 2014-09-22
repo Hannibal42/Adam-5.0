@@ -18,6 +18,3 @@ DBController.class: DBController.java
 CSVReader.class: CSVReader.java
 	$(JCC) $(JFlags) CSVReader.java
 
-#delets all .class files
-clean:
-	$(RM) *.class

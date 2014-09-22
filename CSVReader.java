@@ -1,3 +1,5 @@
+package de.ifsr.adam;
+
 import java.io.IOException;
 import java.io.File;
 import java.nio.charset.Charset;
@@ -12,13 +14,22 @@ import java.util.ArrayList;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 
-class CSVReader {
+/**
+* The CSVReader is used to input CSV files into the database.
+*/
+
+public class CSVReader {
 
 	private final static Charset ENCODING = StandardCharsets.UTF_8; 
 
 	public CSVReader(){
 	}
 
+	/**
+	* Main method for inserting files into the database. Parses the CSV and calls all functions needed
+	* to create the table and insert the values.
+	* @param file path to the CSV file
+	*/
 	public void insertCSVFile(final String filePath){
 		Path path = Paths.get(filePath);
 		List<List<String>> content = new ArrayList<List<String>>();

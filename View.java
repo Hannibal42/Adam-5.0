@@ -1,3 +1,5 @@
+package de.ifsr.adam;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -61,7 +63,6 @@ public class View extends Application{
 			}
 
 		});		
-		
 	
 		//Button for Question selection
 		Button questionBtn = new Button("Select Questions");

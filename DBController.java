@@ -1,13 +1,17 @@
-import java.sql.*;
-/* The DBController class is used to manage the DBConnection and takes all the sql query */
+package de.ifsr.adam;
 
-class DBController {
+/**
+* The DBController is a singelton that manages the connection to the sqlite database.
+*/
+
+import java.sql.*;
+
+public class DBController {
 
 	private static final String DB_NAME = "Ergebnisse.db"; // TODO: This should be more flexibel
 	private static final DBController dbcontroller = new DBController();
 	private static Connection connection;
 	private static final String DB_PATH = System.getProperty("user.dir") + "/" + DB_NAME;  //Gets the current working folder 
-
 
 	static {
 		try {
@@ -26,8 +30,11 @@ class DBController {
 		return dbcontroller;
 	}
 
+	/**
+	* Initializes the Connection and creates a thread that closes the connection when the Runtime is shutdown  
+	*/
 	public void initDBConnection(){
-		
+
 		try {
 			if (connection != null)
 				return;
@@ -56,29 +63,28 @@ class DBController {
 			}
 		});
 	}
-	
+
+
+	/**
+	* @param A SQL Query
+	* @return Creates a prepared statement.
+	*/
 	public PreparedStatement getStatement(String query) throws SQLException{
 			return connection.prepareStatement(query);
 	}
 
+	/**
+	* Sets the auto commit mode of the sql databse
+	*/
 	public void setAutoCommit(Boolean mode) throws SQLException{
 		connection.setAutoCommit(mode);
 	}
 
+	/**
+	* commits all querys
+	*/
 	public void commit() throws SQLException{
 		connection.commit();
-	}
-
-	//Is there a better way to do this? TODO: I dont need this anymore
-	public void execute(String query){
-		try {
-			Statement stmt = connection.createStatement();
-			stmt.executeUpdate(query);
-		}
-		catch(SQLException e){
-			System.out.println(e); //TODO:Maybe add some loging here
-		}
-
 	}
 
 }
