@@ -74,9 +74,9 @@ public class CSVReader {
 		
 		//TODO: What to do with the SQLExceptions
 		try {
-			PreparedStatement stmt = ct.getStatement("DROP TABLE IF EXISTS " + tableName);
+			PreparedStatement stmt = ct.getPreparedStatement("DROP TABLE IF EXISTS " + tableName);
 			stmt.executeUpdate();
-			stmt = ct.getStatement(createString);
+			stmt = ct.getPreparedStatement(createString);
 			stmt.executeUpdate();
 		}
 		catch(SQLException e){
@@ -94,7 +94,7 @@ public class CSVReader {
 			insertString += "?,";
 		}
 
-		insertString = insertString.substring(0,insertString.length()-1);
+		insertString = insertString.substring(0,insertString.length()-1); //Removes the last comma
 		insertString += ")";
 
 		Iterator<List<String>> iterList = values.iterator();
@@ -102,7 +102,7 @@ public class CSVReader {
 
 		try {
 
-			PreparedStatement stmt = ct.getStatement(insertString);
+			PreparedStatement stmt = ct.getPreparedStatement(insertString);
 			ct.setAutoCommit(false);
 
 			while (iterList.hasNext()){

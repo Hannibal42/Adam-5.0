@@ -69,8 +69,12 @@ public class DBController {
 	* @param A SQL Query
 	* @return Creates a prepared statement.
 	*/
-	public PreparedStatement getStatement(String query) throws SQLException{
+	public PreparedStatement getPreparedStatement(String query) throws SQLException{
 			return connection.prepareStatement(query);
+	}
+
+	public Statement getStatement() throws SQLException {
+		return connection.createStatement();
 	}
 
 	/**
