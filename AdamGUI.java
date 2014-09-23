@@ -20,7 +20,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import java.io.File;
 
-public class View extends Application{
+public class AdamGUI extends Application{
 
 	final CSVReader reader = new CSVReader();
 
