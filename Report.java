@@ -7,18 +7,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
 import java.sql.Statement;
+import java.sql.SQLException;
+import java.sql.ResultSet;
 
 public class Report{
 
 	JSONArray report = null;
 
 	private final static Charset ENCODING = StandardCharsets.UTF_8; 
-	private final String tableName = null;
+	private final String tableName;
 
 	public Report(String reportPath,String tableName){
 		Path path = Paths.get(reportPath);
 		String jsonStr = new String();
-		String this.tableName = tableName;
+		this.tableName = tableName;
 		
 		try (Scanner scanner = new Scanner(path,ENCODING.name())){
 
@@ -37,7 +39,7 @@ public class Report{
 	public JSONArray getResult(){
 		for(int i = 0; i < report.length(); i++){
 			try {
-				System.out.println(report.getJSONObject(i));
+				this.getQuestionResult(report.getJSONObject(i));
 			}
 			catch(Exception e){
 				System.out.println(e);
@@ -50,18 +52,36 @@ public class Report{
 		DBController ct = DBController.getInstance();
 		ct.initDBConnection();
 
-		String sqlQuery = "SELECT " + question.getString("question") + " FROM " + tableName;
+		String sqlQuery = "SELECT t1." + question.getString("question") + ",COUNT(t2." + question.getString("question") +") ";
+		sqlQuery += "FROM " + tableName + " t1 ";
+		sqlQuery += "INNER JOIN " + tableName + " t2 ON t1.rowid=t2.rowid ";
+		sqlQuery += "GROUP BY t1." + question.getString("question") + " ";
+		sqlQuery += "ORDER BY t1." + question.getString("question") + " ASC;";
 
-		try {
-			Statement stmt = ct.getStatement(sqlQuery);
-			stmt.executeUpdate();
+		System.out.println(sqlQuery);
 
-			/*SELECT b1.F1,COUNT(b2.F1) FROM b3CSV b1
-			  INNER JOIN b3CSV b2 ON b1.rowid = b2.rowid
-			  GROUP BY b1.F1
-			  ORDER BY b1.F1 ASC
-			*/
-		}
+		/*SELECT b1.F1,COUNT(b2.F1) FROM b3CSV b1
+		 INNER JOIN b3CSV b2 ON b1.rowid = b2.rowid
+		 GROUP BY b1.F1
+		 ORDER BY b1.F1 ASC
+		*/
+
+		 try {
+		 	Statement stmt = ct.getStatement();
+		 	ResultSet resultSet = stmt.executeQuery(sqlQuery);
+		 	JSONArray resultObject = new JSONObject();
+		 	
+		 	while(resultSet.next()){
+		 		resultSet.getInt(1);
+		 		resultSet.getInt(2);	
+		 	}
+
+		 }
+		 catch (SQLException e) {
+		 	System.out.println(e);
+		 }
+
+		return null;
 
 
 	}
