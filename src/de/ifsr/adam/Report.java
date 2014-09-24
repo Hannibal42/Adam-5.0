@@ -1,4 +1,4 @@
-// de.ifsr.adam
+//package de.ifsr.adam;
 
 import org.json.*;
 import java.nio.charset.Charset;
@@ -69,11 +69,10 @@ public class Report{
 		 try {
 		 	Statement stmt = ct.getStatement();
 		 	ResultSet resultSet = stmt.executeQuery(sqlQuery);
-		 	JSONArray resultObject = new JSONObject();
 		 	
 		 	while(resultSet.next()){
-		 		resultSet.getInt(1);
-		 		resultSet.getInt(2);	
+		 		System.out.println(resultSet.getInt(1));
+		 		System.out.println(resultSet.getInt(2));	
 		 	}
 
 		 }
@@ -88,7 +87,7 @@ public class Report{
 
 
 	public static void main(String[] args){
-		Report report = new Report("C:/Users/Simon/Desktop/JAdam/report.json","b3CSV"); 
+		Report report = new Report("C:/Users/Simon/Desktop/JAdam/data/report.json","b3CSV"); 
 		report.getResult();
 	}
 }
