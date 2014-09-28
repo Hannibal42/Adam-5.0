@@ -1,17 +1,17 @@
 //package de.ifsr.adam;
 
 /**
-* The DBController is a singelton that manages the connection to the sqlite database.
+* The DBController is a singelton that manages the connection to the sqlite database. A new Database Ergebnisse.db is created in the working directory.
 */
 
 import java.sql.*;
 
 public class DBController {
 
-	private static final String DB_NAME = "Ergebnisse.db"; // TODO: This should be more flexibel
+	private static final String DB_NAME = "Ergebnisse.db";
 	private static final DBController dbcontroller = new DBController();
 	private static Connection connection;
-	private static final String DB_PATH = System.getProperty("user.dir") + "/" + DB_NAME;  //Gets the current working folder 
+	private static final String DB_PATH = System.getProperty("user.dir") + "/" + DB_NAME;
 
 	static {
 		try {
@@ -31,7 +31,7 @@ public class DBController {
 	}
 
 	/**
-	* Initializes the Connection and creates a thread that closes the connection when the Runtime is shutdown  
+	* Initializes the Connection and creates a thread that closes the connection when the Runtime is shutdown. Must be called before any statements can be created/executed. 
 	*/
 	public void initDBConnection(){
 
@@ -73,12 +73,16 @@ public class DBController {
 			return connection.prepareStatement(query);
 	}
 
+	/**
+	* @param A SQL Query
+	* @return Creates a statement.
+	*/
 	public Statement getStatement() throws SQLException {
 		return connection.createStatement();
 	}
 
 	/**
-	* Sets the auto commit mode of the sql databse
+	* Sets the auto commit mode of the sql databse.
 	*/
 	public void setAutoCommit(Boolean mode) throws SQLException{
 		connection.setAutoCommit(mode);

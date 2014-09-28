@@ -5,19 +5,29 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.io.Writer;
+import java.io.PrintWriter;
+import java.io.File;
 import java.util.Scanner;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
+/**
+* Main class for report handling, can construct a report from JSON file and has functionality for evaluationg and saving the report.
+*/
 public class Report{
-
-	JSONArray report = null;
 
 	private final static Charset ENCODING = StandardCharsets.UTF_8; 
 	private final String tableName;
+	private JSONArray report = null;
+	private Boolean result = false;
 
-	public Report(String reportPath,String tableName){
+	/**
+	*	Basic Report constructor, reads a prepared report from a JSON file.
+	* 	@param reportPath - Path to the JSON file, tableName - the table you want to operate on. 
+	*/
+	public Report(String reportPath, String tableName){
 		Path path = Paths.get(reportPath);
 		String jsonStr = new String();
 		this.tableName = tableName;
@@ -35,19 +45,30 @@ public class Report{
 		}
 	}
 
+	/**
+	*	Evaluates the questions that are defined in the report. Should be used before anyother function call is made. Sets the result field true.
+	*/
+	public void createResults(){
+		JSONObject currentQuestion;
 
-	public JSONArray getResult(){
-		for(int i = 0; i < report.length(); i++){
-			try {
-				this.getQuestionResult(report.getJSONObject(i));
+		for(int i = 0; i < report.length(); i++){	
+			try{
+				currentQuestion = report.getJSONObject(i); //getJSONObject is reference but the doc says its by value
+				currentQuestion.put("result",getQuestionResult(currentQuestion));
 			}
 			catch(Exception e){
 				System.out.println(e);
 			}
 		}
-		return null;
+		result = true;
 	}
 
+	/**
+	*	A function to evaluate one question in a report, used in createResults()
+	*	@param question - A singel questions of a report
+	*	@return A JSONObject holding all the results.
+	* 	@throws JSONException if no new JSONObject can be created
+	*/
 	private JSONObject getQuestionResult(JSONObject question) throws JSONException{
 		DBController ct = DBController.getInstance();
 		ct.initDBConnection();
@@ -58,36 +79,98 @@ public class Report{
 		sqlQuery += "GROUP BY t1." + question.getString("question") + " ";
 		sqlQuery += "ORDER BY t1." + question.getString("question") + " ASC;";
 
-		System.out.println(sqlQuery);
-
-		/*SELECT b1.F1,COUNT(b2.F1) FROM b3CSV b1
+		/* Exampel Query
+		 SELECT b1.F1,COUNT(b2.F1) FROM b3CSV b1
 		 INNER JOIN b3CSV b2 ON b1.rowid = b2.rowid
 		 GROUP BY b1.F1
 		 ORDER BY b1.F1 ASC
 		*/
 
-		 try {
+		JSONObject resultJSON = new JSONObject();
+		try {
 		 	Statement stmt = ct.getStatement();
 		 	ResultSet resultSet = stmt.executeQuery(sqlQuery);
 		 	
-		 	while(resultSet.next()){
-		 		System.out.println(resultSet.getInt(1));
-		 		System.out.println(resultSet.getInt(2));	
+		 	while(resultSet.next()){	
+		 		resultJSON.put(resultSet.getString(1),resultSet.getInt(2));
 		 	}
 
-		 }
-		 catch (SQLException e) {
+		}
+		catch (SQLException e) {
 		 	System.out.println(e);
-		 }
+		}
 
+		return resultJSON;
+	}
+
+
+	/**
+	* @return The value of the report field.
+	*/
+	public JSONArray getReport(){
+		return this.report;
+	}
+
+	/**
+	* Writes the report to a JSON file.
+	* @param path - Path to the output directory, fileName - the name of the JSON file
+	*/
+	public void writeReportToFile(String path, String fileName){
+		try{
+			File file = new File(path+ "/"+ fileName + ".json");
+			file.delete();
+			file.createNewFile();
+
+			PrintWriter writer = new PrintWriter(file);
+			writer.println(this.report.toString(1));
+			writer.close();
+		}
+		catch(Exception e){
+			System.out.println(e);
+		}
+	}
+
+	/**
+	* @return The value of the result field.
+	*/
+	public Boolean hasResult(){
+		return this.result;
+	}
+
+	/**
+	* Gives back the result JSONObject of a given question, createResults() must be called before this function is used.
+	* @param question - the question
+	* @return The JSONObject holding the results for the question.
+	*/
+	public JSONObject getResult(String question){
+		JSONObject curQuestion = null;  
+		String questionName = null;
+
+		for(int i = 0; i < report.length(); i++){
+			
+			try{
+				curQuestion = report.getJSONObject(i);
+				questionName = curQuestion.getString("question");
+			}
+			catch(JSONException e){
+				System.out.println(e);
+			}
+
+			if(question.equals(questionName)){
+				try {
+					return curQuestion.getJSONObject("result");
+				}
+				catch(JSONException e){
+				}
+			}
+			
+		}
 		return null;
-
-
 	}
 
-
-	public static void main(String[] args){
+	/*public static void main(String[] args){
 		Report report = new Report("C:/Users/Simon/Desktop/JAdam/data/report.json","b3CSV"); 
-		report.getResult();
-	}
+		report.createResults();
+		report.writeReportToFile(System.getProperty("user.dir"),"Report");
+	}*/
 }

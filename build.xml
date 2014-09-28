@@ -4,6 +4,10 @@
 		<fileset dir="lib" includes="**/*.jar" />
 	</path>
 
+	<path id="classpath2">
+		<fileset dir="build/classes" includes="**/*.class" />
+	</path>
+
 	<target name="clean">
 		<delet dir="build"/>
 	</target>
@@ -23,7 +27,7 @@
 	</target>
 
 	<target name="run">
-		<java classpathref="classpath" classname="AdamGUI" classpath="build/classes"/>
+		<java classname="AdamGUI"/>
 	</target>
 
 </project>
