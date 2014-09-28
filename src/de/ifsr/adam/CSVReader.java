@@ -15,9 +15,8 @@ import java.sql.SQLException;
 import java.sql.PreparedStatement;
 
 /**
-* The CSVReader is used to input CSV files into the database.
+* The CSVReader reads the data of the evaluation from a given CSV file.
 */
-
 public class CSVReader {
 
 	private final static Charset ENCODING = StandardCharsets.UTF_8; 
@@ -27,8 +26,8 @@ public class CSVReader {
 
 	/**
 	* Main method for inserting files into the database. Parses the CSV and calls all functions needed
-	* to create the table and insert the values.
-	* @param file path to the CSV file
+	* to create the table and insert the values into the database.
+	* @param filePath - path to a CSV file
 	*/
 	public void insertCSVFile(final String filePath){
 		Path path = Paths.get(filePath);
@@ -58,10 +57,15 @@ public class CSVReader {
 		}
 	}
 
+	/**
+	* Creates the table for a CSV file.
+	* @param tableName - Name for the new table, headRow - A List containing all column names.
+	*/
 	private void createTable(String tableName,List<String> headRow) {
 		DBController ct = DBController.getInstance();
 		ct.initDBConnection();
 		tableName = this.cleanString(tableName);
+
 		String createString = "CREATE TABLE "+ tableName + "(";   
 		Iterator<String> iter = headRow.iterator();
 
@@ -72,7 +76,6 @@ public class CSVReader {
 		createString = createString.substring(0,createString.length()-2);
 		createString += ")";
 		
-		//TODO: What to do with the SQLExceptions
 		try {
 			PreparedStatement stmt = ct.getPreparedStatement("DROP TABLE IF EXISTS " + tableName);
 			stmt.executeUpdate();
@@ -82,8 +85,13 @@ public class CSVReader {
 		catch(SQLException e){
 			System.out.println(e);
 		}
+
 	}
-	
+
+	/**
+	* Inserts the values of the file into the table given.
+	* @param tableName - Name of the table, values - A matrix with each value in the file, each List in the List is a line in the file.
+	*/ 
 	private void insertValues(String tableName, List<List<String>> values) {
 		DBController ct =DBController.getInstance();
 		ct.initDBConnection();
@@ -94,11 +102,11 @@ public class CSVReader {
 			insertString += "?,";
 		}
 
-		insertString = insertString.substring(0,insertString.length()-1); //Removes the last comma
+		insertString = insertString.substring(0,insertString.length()-1); //Removes the last comma.
 		insertString += ")";
 
 		Iterator<List<String>> iterList = values.iterator();
-		iterList.next(); //Removes the first list with the column names
+		iterList.next(); //Removes the first list with the column names.
 
 		try {
 
@@ -120,7 +128,6 @@ public class CSVReader {
 		catch(SQLException e){
 			System.out.println(e);
 		}
-
 		finally{
 			try{
 				ct.setAutoCommit(true);
@@ -131,6 +138,9 @@ public class CSVReader {
 		}
 	}
 
+	/**
+	* Checks if the file ends with .CSV or .csv
+	*/
 	public Boolean isCSVFile(String filePath){
 		if (filePath.endsWith(".CSV") || filePath.endsWith(".csv")){
 			return true;
@@ -138,15 +148,24 @@ public class CSVReader {
 		return false;
 	}
 
+	/**
+	* Checks if there is a file at the end of the path.
+	*/
 	public Boolean isFilePath(String filePath){
 		File file = new File(filePath);
 		return file.exists();
 	}
 
+	/**
+	* Removes all alphanumeric characters from the string.
+	*/
 	private String cleanString(String input){
 		return input.replaceAll("\\W",""); //Removes all non Word chars
 	}
 
+	/**
+	* Returns the name of the file.
+	*/
 	private String getFileName(String filePath){
 		File file = new File(filePath);
 		return file.getName();

@@ -20,8 +20,13 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import java.io.File;
 
+/**
+* Provides the main GUI for Adam and makes all the calls to the other classes. 
+*/
+
 public class AdamGUI extends Application{
 
+	/** Used to input the CSV files of the evaluation.*/
 	final CSVReader reader = new CSVReader();
 
 	@Override
