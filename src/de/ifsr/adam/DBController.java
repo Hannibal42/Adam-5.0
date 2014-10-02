@@ -1,4 +1,4 @@
-//package de.ifsr.adam;
+package de.ifsr.adam;
 
 /**
 * The DBController is a singelton that manages the connection to the sqlite database. A new Database Ergebnisse.db is created in the working directory.

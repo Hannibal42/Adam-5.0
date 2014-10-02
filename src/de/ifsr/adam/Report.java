@@ -1,4 +1,4 @@
-//package de.ifsr.adam;
+package de.ifsr.adam;
 
 import org.json.*;
 import java.nio.charset.Charset;
@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 
 /**
-* Main class for report handling, can construct a report from JSON file and has functionality for evaluationg and saving the report.
+* Main class for report handling, can construct a report from JSON file and has functionality for evaluating and saving the report.
 */
 public class Report{
 
@@ -168,9 +168,9 @@ public class Report{
 		return null;
 	}
 
-	/*public static void main(String[] args){
+	public static void main(String[] args){
 		Report report = new Report("C:/Users/Simon/Desktop/JAdam/data/report.json","b3CSV"); 
 		report.createResults();
 		report.writeReportToFile(System.getProperty("user.dir"),"Report");
-	}*/
+	}
 }
