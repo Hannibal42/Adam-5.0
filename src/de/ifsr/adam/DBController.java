@@ -1,7 +1,7 @@
 package de.ifsr.adam;
 
 /**
-* The DBController is a singelton that manages the connection to the sqlite database. A new Database Ergebnisse.db is created in the working directory.
+* The DBController is a singelton that manages the connection to the sqlite-database. A new Database Ergebnisse.db is created in the working directory.
 */
 
 import java.sql.*;
@@ -66,7 +66,7 @@ public class DBController {
 
 
 	/**
-	* @param A SQL Query
+	* @param query A SQL query
 	* @return Creates a prepared statement.
 	*/
 	public PreparedStatement getPreparedStatement(String query) throws SQLException{
@@ -74,7 +74,6 @@ public class DBController {
 	}
 
 	/**
-	* @param A SQL Query
 	* @return Creates a statement.
 	*/
 	public Statement getStatement() throws SQLException {
@@ -82,7 +81,7 @@ public class DBController {
 	}
 
 	/**
-	* Sets the auto commit mode of the sql databse.
+	* Sets the auto commit mode of the sql-database.
 	*/
 	public void setAutoCommit(Boolean mode) throws SQLException{
 		connection.setAutoCommit(mode);

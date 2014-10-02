@@ -5,7 +5,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.io.Writer;
 import java.io.PrintWriter;
 import java.io.File;
 import java.util.Scanner;
@@ -25,7 +24,7 @@ public class Report{
 
 	/**
 	*	Basic Report constructor, reads a prepared report from a JSON file.
-	* 	@param reportPath - Path to the JSON file, tableName - the table you want to operate on. 
+	* 	@param reportPath Path to the JSON file, tableName - the table you want to operate on. 
 	*/
 	public Report(String reportPath, String tableName){
 		Path path = Paths.get(reportPath);
@@ -46,7 +45,7 @@ public class Report{
 	}
 
 	/**
-	*	Evaluates the questions that are defined in the report. Should be used before anyother function call is made. Sets the result field true.
+	* Evaluates the questions that are defined in the report. Should be used before any other function call is made. Sets the result field true.
 	*/
 	public void createResults(){
 		JSONObject currentQuestion;
@@ -65,7 +64,7 @@ public class Report{
 
 	/**
 	*	A function to evaluate one question in a report, used in createResults()
-	*	@param question - A singel questions of a report
+	*	@param question A single questions of a report
 	*	@return A JSONObject holding all the results.
 	* 	@throws JSONException if no new JSONObject can be created
 	*/
@@ -113,7 +112,7 @@ public class Report{
 
 	/**
 	* Writes the report to a JSON file.
-	* @param path - Path to the output directory, fileName - the name of the JSON file
+	* @param path Path to the output directory, fileName - the name of the JSON file
 	*/
 	public void writeReportToFile(String path, String fileName){
 		try{
@@ -139,7 +138,7 @@ public class Report{
 
 	/**
 	* Gives back the result JSONObject of a given question, createResults() must be called before this function is used.
-	* @param question - the question
+	* @param question the question
 	* @return The JSONObject holding the results for the question.
 	*/
 	public JSONObject getResult(String question){

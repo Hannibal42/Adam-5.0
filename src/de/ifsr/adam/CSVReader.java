@@ -27,7 +27,7 @@ public class CSVReader {
 	/**
 	* Main method for inserting files into the database. Parses the CSV and calls all functions needed
 	* to create the table and insert the values into the database.
-	* @param filePath - path to a CSV file
+	* @param filePath path to a CSV file
 	*/
 	public void insertCSVFile(final String filePath){
 		Path path = Paths.get(filePath);
@@ -59,7 +59,7 @@ public class CSVReader {
 
 	/**
 	* Creates the table for a CSV file.
-	* @param tableName - Name for the new table, headRow - A List containing all column names.
+	* @param tableName Name for the new table, headRow - A List containing all column names.
 	*/
 	private void createTable(String tableName,List<String> headRow) {
 		DBController ct = DBController.getInstance();
@@ -90,7 +90,7 @@ public class CSVReader {
 
 	/**
 	* Inserts the values of the file into the table given.
-	* @param tableName - Name of the table, values - A matrix with each value in the file, each List in the List is a line in the file.
+	* @param tableName Name of the table, values - A matrix with each value in the file, each List in the List is a line in the file.
 	*/ 
 	private void insertValues(String tableName, List<List<String>> values) {
 		DBController ct =DBController.getInstance();
