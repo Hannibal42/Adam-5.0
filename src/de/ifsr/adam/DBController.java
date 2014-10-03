@@ -5,6 +5,7 @@ package de.ifsr.adam;
 */
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class DBController {
 
@@ -93,5 +94,26 @@ public class DBController {
 	public void commit() throws SQLException{
 		connection.commit();
 	}
-
+        
+        public ArrayList<String> getTableNames(){
+            initDBConnection();
+            String query = "SELECT name FROM sqlite_master WHERE type='table';";
+            ArrayList<String> tableNames = new ArrayList<String>();
+            try {
+                Statement stmt = connection.createStatement();
+                ResultSet resultSet = stmt.executeQuery(query);
+                while(resultSet.next()) {
+                    tableNames.add(resultSet.getString(1));
+                }
+            }
+            catch(Exception e){
+                System.out.println(e);
+            }
+            return tableNames;
+        }
+        
+        public static void main(String[] args){
+            DBController ct = DBController.getInstance();
+            System.out.println(ct.getTableNames());
+        }
 }

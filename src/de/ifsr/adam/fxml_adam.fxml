@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<TabPane fx:controller="de.ifsr.adam.FXMLAdamController" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<TabPane fx:id="root" tabClosingPolicy="UNAVAILABLE" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="de.ifsr.adam.FXMLAdamController">
   <tabs>
     <Tab text="Import">
       <content>
@@ -29,6 +29,12 @@
                   <Button fx:id="selectFolderBtn" mnemonicParsing="false" text="Select Folder" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <TextField fx:id="selectImportFileTextField" />
                   <TextField GridPane.rowIndex="1" />
+                  <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <children>
+                        <Button fx:id="importBtn" mnemonicParsing="false" onAction="#handleImportButtonAction" text="Import" />
+                     </children>
+                  </HBox>
+                  <Text fx:id="importActionTarget" GridPane.columnIndex="0" GridPane.rowIndex="2"></Text>
                </children>
             </GridPane>
       </content>

@@ -16,28 +16,16 @@ import javafx.stage.Stage;
  * @author Simon
  */
 public class FXMLAdam extends Application {
-    private static Stage stage; //TODO: Not sure if this is the right way to share the Stage
-    private static Scene scene; //TODO: I realy shouldnt do this....
     
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("fxml_adam.fxml"));
-        this.stage = stage;
         
         Scene scene = new Scene(root, 230, 150);
-        this.scene = scene;
         
         stage.setTitle("Adam 5.0");
         stage.setScene(scene);
         stage.show();
-    }
-    
-    public static Stage getStage(){
-        return stage; 
-    }
-    
-    public static Scene getScene(){
-        return scene;
     }
 
     /**
