@@ -24,7 +24,8 @@ public class Report{
 
 	/**
 	*	Basic Report constructor, reads a prepared report from a JSON file.
-	* 	@param reportPath Path to the JSON file, tableName - the table you want to operate on. 
+	* 	@param reportPath Path to the JSON file
+        *       @param tableName the table you want to operate on. 
 	*/
 	public Report(String reportPath, String tableName){
 		Path path = Paths.get(reportPath);
@@ -112,7 +113,8 @@ public class Report{
 
 	/**
 	* Writes the report to a JSON file.
-	* @param path Path to the output directory, fileName - the name of the JSON file
+	* @param path Path to the output directory
+        * @param fileName the name of the new JSON file
 	*/
 	public void writeReportToFile(String path, String fileName){
 		try{
@@ -128,7 +130,27 @@ public class Report{
 			System.out.println(e);
 		}
 	}
+        
+        /**
+	* Writes the report to a JSON file.
+	* @param file The file you want to save to.
+	*/
+        public void writeReportToFile(File file){
+            try{
+		file.delete();
+		file.createNewFile();
 
+		PrintWriter writer = new PrintWriter(file);
+		writer.println(this.report.toString(1));
+		writer.close();
+            }
+            catch(Exception e){ //TODO:
+		System.out.println(e);
+            }
+	}
+        
+
+        
 	/**
 	* @return The value of the result field.
 	*/

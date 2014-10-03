@@ -138,6 +138,8 @@ public class CSVReader {
 		}
 	}
 
+        
+        //TODO: Find a better home for those poor functions
 	/**
 	* Checks if the file ends with .CSV or .csv
 	*/
@@ -147,6 +149,10 @@ public class CSVReader {
 		}
 		return false;
 	}
+        
+        public Boolean isJSONFile(String filePath){
+            return (filePath.endsWith(".JSON") || filePath.endsWith(".json"));
+        }
 
 	/**
 	* Checks if there is a file at the end of the path.

@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<TabPane fx:id="root" tabClosingPolicy="UNAVAILABLE" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="de.ifsr.adam.FXMLAdamController">
+<TabPane fx:id="root" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.ifsr.adam.FXMLAdamController">
   <tabs>
     <Tab text="Import">
       <content>
@@ -25,16 +25,16 @@
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding>
                <children>
-                  <Button fx:id="selectFileBtn" mnemonicParsing="false" onAction="#handleSelectFileButtonAction" text="Select File" GridPane.columnIndex="1" />
+                  <Button mnemonicParsing="false" onAction="#handleImportSelectFileButtonAction" text="Select File" GridPane.columnIndex="1" />
                   <Button fx:id="selectFolderBtn" mnemonicParsing="false" text="Select Folder" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <TextField fx:id="selectImportFileTextField" />
+                  <TextField fx:id="importSelectFileTextField" />
                   <TextField GridPane.rowIndex="1" />
-                  <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                      <children>
                         <Button fx:id="importBtn" mnemonicParsing="false" onAction="#handleImportButtonAction" text="Import" />
                      </children>
                   </HBox>
-                  <Text fx:id="importActionTarget" GridPane.columnIndex="0" GridPane.rowIndex="2"></Text>
+                  <Text fx:id="importActionTarget" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                </children>
             </GridPane>
       </content>
@@ -58,11 +58,19 @@
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding>
                <children>
-                  <ChoiceBox prefWidth="150.0" />
-                  <TextField GridPane.rowIndex="1" />
-                  <Button mnemonicParsing="false" text="Select Report" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <ChoiceBox fx:id="diagramSelectClassChoiceBox" prefWidth="150.0" />
+                  <TextField fx:id="diagramSelectReportTextField" GridPane.rowIndex="1" />
+                  <Button mnemonicParsing="false" onAction="#handleDiagramSelectReportButtonAction" text="Select Report" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Label text="Select Class" GridPane.columnIndex="1" />
-                  <Button mnemonicParsing="false" text="Save Diagram" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Button mnemonicParsing="false" onAction="#handleDiagramSaveButtonAction" text="Save Diagram" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2">
+                     <children>
+                        <Text fx:id="diagramActionTarget" strokeType="OUTSIDE" strokeWidth="0.0">
+                           <font>
+                              <Font size="10.0" />
+                           </font></Text>
+                     </children>
+                  </HBox>
                </children>
             </GridPane>
       </content>

@@ -30,27 +30,19 @@ public class FXMLAdamController implements Initializable {
     @FXML private Parent root; //I am rooooooooot!
     private final CSVReader reader = new CSVReader();
     private final File defaultDir = new File(System.getProperty("user.dir"));
+    private final FileChooser importFileChooser = new FileChooser();
+    private final FileChooser diagramReportChooser = new FileChooser();
     
-    
-    @FXML private Label label;
-    @FXML private Text actionTarget;
-    @FXML private final FileChooser importFileChooser = new FileChooser();
-    @FXML private TextField selectImportFileTextField;
+    @FXML private TextField importSelectFileTextField;
+    @FXML private TextField diagramSelectReportTextField;
     @FXML private Text importActionTarget;
+    @FXML private Text diagramActionTarget;
     @FXML private ChoiceBox<String> diagramSelectClassChoiceBox;
-    
-    
-  
-    @FXML
-    private void handleButtonAction(ActionEvent event) {
-        System.out.println("You clicked me!");
-        label.setText("Hello World!");
-    }
     
     @FXML
     private void handleImportButtonAction(ActionEvent event){
         importActionTarget.setText(" ");
-	String filePath = selectImportFileTextField.getText();
+	String filePath = importSelectFileTextField.getText();
 	if (reader.isFilePath(filePath)){
             if(reader.isCSVFile(filePath)){
                 
@@ -64,45 +56,77 @@ public class FXMLAdamController implements Initializable {
                 importFileChooser.setInitialDirectory(file);
             }
             else{
-		selectImportFileTextField.setText("Not a CSV file!");
+		importActionTarget.setText("Not a CSV file!");
             }
 	}
 	else {
-            selectImportFileTextField.setText("Not a valid file path!");
+            importActionTarget.setText("Not a valid file path!");
         }
     }
     
     @FXML
-    private void handleSubmitButtonAction(ActionEvent event) {
-        actionTarget.setText("Sign in button pressed");
+    private void handleDiagramSaveButtonAction(ActionEvent event) {
+        diagramActionTarget.setText(" ");
+        String filePath = diagramSelectReportTextField.getText();
+        String tableName = diagramSelectClassChoiceBox.getValue();
+        Report report;
+        if(reader.isFilePath(filePath)) {
+            if(reader.isJSONFile(filePath)) {
+                report = new Report(filePath,tableName);
+                report.createResults();
+                
+                Stage stage = (Stage) root.getScene().getWindow();
+                File file = diagramReportChooser.showSaveDialog(stage);
+                report.writeReportToFile(new File(file.getAbsolutePath() + ".json")); //TODO: Change this.
+                
+                diagramActionTarget.setFill(Color.BLUE);
+                diagramActionTarget.setText("Diagrams generated!"); //TODO Add some succesfull test.
+                
+                file = new File(filePath);
+                file = new File(file.getParent());
+                diagramReportChooser.setInitialDirectory(file);
+            }
+            else {
+                diagramActionTarget.setText("Not a JSON file!");
+            }
+        }
+        else{
+            diagramActionTarget.setText("Not a valid file path!");
+        }
     }
     
     @FXML
-    private void handleSelectFileButtonAction(ActionEvent event){
+    private void handleImportSelectFileButtonAction(ActionEvent event){
         Stage stage = (Stage) root.getScene().getWindow();
         
         File file = importFileChooser.showOpenDialog(stage);
             if (file != null){
-                selectImportFileTextField.setText(file.getPath());
+                importSelectFileTextField.setText(file.getPath());
             } 
     }
     
     @FXML
-    private void handleDiagramSelectClassChoiceBoxAction(ActionEvent event) {
-        System.out.println("Hallo Welt!"); 
+    private void handleDiagramSelectReportButtonAction(ActionEvent event) {
+        Stage stage = (Stage) root.getScene().getWindow();
+        
+        File file = diagramReportChooser.showOpenDialog(stage);
+            if (file != null){
+                diagramSelectReportTextField.setText(file.getPath());
+            }  
     }
     
     private ObservableList<String> getTableNames() {
-        return FXCollections.observableArrayList(DBController.getInstance().getTableNames());
+        ObservableList<String> tableNames;
+        tableNames = FXCollections.observableList(DBController.getInstance().getTableNames());
+        return tableNames;      
     }
 
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         importFileChooser.setInitialDirectory(defaultDir);
-        System.out.println(this.getTableNames());
-        //System.out.println(diagramSelectClassChoiceBox.getItems());
-        //diagramSelectClassChoiceBox.setItems(this.getTableNames());         
+        diagramReportChooser.setInitialDirectory(defaultDir);
+        diagramSelectClassChoiceBox.setItems(this.getTableNames());         
     }    
     
 }
