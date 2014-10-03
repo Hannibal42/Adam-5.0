@@ -26,9 +26,9 @@
                </padding>
                <children>
                   <Button mnemonicParsing="false" onAction="#handleImportSelectFileButtonAction" text="Select File" GridPane.columnIndex="1" />
-                  <Button fx:id="selectFolderBtn" mnemonicParsing="false" text="Select Folder" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Button mnemonicParsing="false" onAction="#handleImportSelectDirectoryButtonAction" text="Select Folder" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <TextField fx:id="importSelectFileTextField" />
-                  <TextField GridPane.rowIndex="1" />
+                  <TextField fx:id="importSelectDirectoryTextField" GridPane.rowIndex="1" />
                   <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                      <children>
                         <Button fx:id="importBtn" mnemonicParsing="false" onAction="#handleImportButtonAction" text="Import" />

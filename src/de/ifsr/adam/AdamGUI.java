@@ -109,15 +109,15 @@ public class AdamGUI extends Application{
 		grid.add(actiontarget,1,6);
 
 		saveBtn.setOnAction(new EventHandler<ActionEvent>() { 
-
+                    
 			@Override
 			public void handle(ActionEvent e){
 				actiontarget.setFill(Color.FIREBRICK);
 				actiontarget.setText("Diagrams generated.");
 				
 				String filePath = dataTextField.getText();
-				if (reader.isFilePath(filePath)){
-					if(reader.isCSVFile(filePath)){
+				if (true){
+					if(true){//TODO: 
 						reader.insertCSVFile(filePath);
 					}
 					else{
@@ -128,7 +128,7 @@ public class AdamGUI extends Application{
 					dataTextField.setText("Not a valid file path!");
 				}
 			}
-		});
+		}); 
 
 		//grid.setGridLinesVisible(true);
 		Scene scene = new Scene(grid,300,275);

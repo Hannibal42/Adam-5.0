@@ -2,6 +2,7 @@ package de.ifsr.adam;
 
 import java.io.IOException;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -50,11 +51,24 @@ public class CSVReader {
 	}
 
 	//TODO: Fix this.
-	public void insertCSVFolder(List<String> filePaths) throws IOException {
-		Iterator<String> iter = filePaths.iterator();
-		while (iter.hasNext()){
-			this.insertCSVFile(iter.next()); 
-		}
+	public void insertCSVDirectory(final String dirPath) {
+		File directory = new File(dirPath);
+                
+                FilenameFilter filter = new FilenameFilter() {
+                    @Override
+                    public boolean accept(File dir, String name){
+                        return name.toLowerCase().endsWith(".csv");
+                    }
+                };
+                
+                File[] files = directory.listFiles(filter);
+                
+                for(File file : files) {
+                    if (file.isFile()){
+                        insertCSVFile(file.getPath());
+                    }
+                }
+
 	}
 
 	/**
@@ -136,30 +150,6 @@ public class CSVReader {
 				System.out.println(e);
 			}
 		}
-	}
-
-        
-        //TODO: Find a better home for those poor functions
-	/**
-	* Checks if the file ends with .CSV or .csv
-	*/
-	public Boolean isCSVFile(String filePath){
-		if (filePath.endsWith(".CSV") || filePath.endsWith(".csv")){
-			return true;
-		}
-		return false;
-	}
-        
-        public Boolean isJSONFile(String filePath){
-            return (filePath.endsWith(".JSON") || filePath.endsWith(".json"));
-        }
-
-	/**
-	* Checks if there is a file at the end of the path.
-	*/
-	public Boolean isFilePath(String filePath){
-		File file = new File(filePath);
-		return file.exists();
 	}
 
 	/**

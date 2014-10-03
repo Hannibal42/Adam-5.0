@@ -11,11 +11,12 @@ import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.scene.Parent;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.scene.control.ChoiceBox;
@@ -32,19 +33,40 @@ public class FXMLAdamController implements Initializable {
     private final File defaultDir = new File(System.getProperty("user.dir"));
     private final FileChooser importFileChooser = new FileChooser();
     private final FileChooser diagramReportChooser = new FileChooser();
+    private final DirectoryChooser importDirectoryChooser = new DirectoryChooser();
     
     @FXML private TextField importSelectFileTextField;
     @FXML private TextField diagramSelectReportTextField;
+    @FXML private TextField importSelectDirectoryTextField;
     @FXML private Text importActionTarget;
     @FXML private Text diagramActionTarget;
     @FXML private ChoiceBox<String> diagramSelectClassChoiceBox;
     
     @FXML
     private void handleImportButtonAction(ActionEvent event){
+        String dirPath = importSelectDirectoryTextField.getText();
+        String filePath = importSelectFileTextField.getText();
+        
+        if((dirPath.equals("")) && (filePath.equals(""))){
+            importActionTarget.setText("Select import data");
+        }
+        if((!dirPath.equals("")) && (!filePath.equals(""))) {
+            importActionTarget.setText("Choose only one");
+        }
+        if(!dirPath.equals("")){
+            importDirectory(event); //TODO: Build update function for the Choicebox
+        }
+        if(!filePath.equals("")){
+            importSingleFile(event);
+        }      
+    }
+    
+    private void importSingleFile(ActionEvent event){
         importActionTarget.setText(" ");
 	String filePath = importSelectFileTextField.getText();
-	if (reader.isFilePath(filePath)){
-            if(reader.isCSVFile(filePath)){
+        
+	if (isFilePath(filePath)){
+            if(isCSVFile(filePath)){
                 
 		reader.insertCSVFile(filePath);
                 
@@ -64,20 +86,40 @@ public class FXMLAdamController implements Initializable {
         }
     }
     
+    private void importDirectory(ActionEvent event){
+        importActionTarget.setText(" ");
+	String dirPath = importSelectDirectoryTextField.getText();
+        
+	if (isDirectoryPath(dirPath)){
+          
+		reader.insertCSVDirectory(dirPath);
+                
+                importActionTarget.setFill(Color.BLUE);
+                importActionTarget.setText("Import succesfull!"); //TODO Add some succesfull test.
+               
+                File file = new File(dirPath);
+                file = new File(file.getParent());
+                importDirectoryChooser.setInitialDirectory(file);
+	}
+	else {
+            importActionTarget.setText("Not a valid directory path!");
+        } 
+    }
+    
     @FXML
     private void handleDiagramSaveButtonAction(ActionEvent event) {
         diagramActionTarget.setText(" ");
         String filePath = diagramSelectReportTextField.getText();
         String tableName = diagramSelectClassChoiceBox.getValue();
         Report report;
-        if(reader.isFilePath(filePath)) {
-            if(reader.isJSONFile(filePath)) {
+        if(isFilePath(filePath)) {
+            if(isJSONFile(filePath)) {
                 report = new Report(filePath,tableName);
                 report.createResults();
                 
                 Stage stage = (Stage) root.getScene().getWindow();
                 File file = diagramReportChooser.showSaveDialog(stage);
-                report.writeReportToFile(new File(file.getAbsolutePath() + ".json")); //TODO: Change this.
+                report.writeReportToFile(new File(file.getAbsolutePath() + ".json")); //TODO: Change this. A Diagram should be generated here.
                 
                 diagramActionTarget.setFill(Color.BLUE);
                 diagramActionTarget.setText("Diagrams generated!"); //TODO Add some succesfull test.
@@ -100,9 +142,21 @@ public class FXMLAdamController implements Initializable {
         Stage stage = (Stage) root.getScene().getWindow();
         
         File file = importFileChooser.showOpenDialog(stage);
-            if (file != null){
-                importSelectFileTextField.setText(file.getPath());
-            } 
+        if (file != null){
+            importSelectFileTextField.setText(file.getPath());
+        } 
+    }
+    
+    @FXML
+    private void handleImportSelectDirectoryButtonAction(ActionEvent event){
+        Stage stage = (Stage) root.getScene().getWindow();
+        
+        File file = importDirectoryChooser.showDialog(stage);
+        if (file != null){
+            System.out.println(file.getPath());
+            importSelectDirectoryTextField.setText(file.getPath());
+        }
+        
     }
     
     @FXML
@@ -121,12 +175,59 @@ public class FXMLAdamController implements Initializable {
         return tableNames;      
     }
 
+    /**
+     * Checks if the file ends with .CSV or .csv
+     */
+    /**
+     *
+     * @param filePath the value of filePath
+     */
+    private Boolean isCSVFile(String filePath) {
+        return (filePath.endsWith(".CSV") || filePath.endsWith(".csv"));
+    }
+
+    /**
+     * Checks if there is a file at the end of the path.
+     *
+     */
+    private Boolean isFilePath(String filePath) {
+        File file = new File(filePath);
+        return file.isFile();
+    }
+    
+    private Boolean isDirectoryPath(String dirPath){
+        File file = new File(dirPath);
+        return file.isDirectory();
+    }
+
+    /**
+     *
+     * @param filePath the value of filePath
+     */
+    private Boolean isJSONFile(String filePath) {
+        return filePath.endsWith(".JSON") || filePath.endsWith(".json");
+    }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
         importFileChooser.setInitialDirectory(defaultDir);
+        importFileChooser.setTitle("Choose a Class csv");
+        ExtensionFilter csvFilter;
+        csvFilter = new ExtensionFilter("CSV Files(*.csv)","*.csv");
+        importFileChooser.getExtensionFilters().add(csvFilter);
+        
+        importDirectoryChooser.setTitle("Choose a Directory");
+        
         diagramReportChooser.setInitialDirectory(defaultDir);
-        diagramSelectClassChoiceBox.setItems(this.getTableNames());         
+        diagramReportChooser.setTitle("Choose a Report json");
+        ExtensionFilter jsonFilter;
+        jsonFilter = new ExtensionFilter("JSON Files(*.json)","*.json");
+        diagramReportChooser.getExtensionFilters().add(jsonFilter);
+        
+        diagramSelectClassChoiceBox.setItems(this.getTableNames());
+        
+        
     }    
     
 }
