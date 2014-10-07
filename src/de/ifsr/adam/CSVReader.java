@@ -29,8 +29,9 @@ public class CSVReader {
 	* Main method for inserting files into the database. Parses the CSV and calls all functions needed
 	* to create the table and insert the values into the database.
 	* @param filePath path to a CSV file
+        * @return Returns true if the insertion succeeded
 	*/
-	public void insertCSVFile(final String filePath){
+	public boolean insertCSVFile(final String filePath){
 		Path path = Paths.get(filePath);
 		List<List<String>> content = new ArrayList<List<String>>();
 
@@ -44,14 +45,21 @@ public class CSVReader {
 		}
 		catch (IOException e) {
 			System.out.println(e);
+                        return false;
 		}
 
 		this.createTable(this.getFileName(filePath), content.get(0));
 		this.insertValues(this.getFileName(filePath), content);
+                return true;
 	}
 
-	//TODO: Fix this.
-	public void insertCSVDirectory(final String dirPath) {
+        /**
+	* The method for inserting files into the database. Parses the CSV and calls all functions needed
+	* to create the table and insert the values into the database.
+	* @param dirPath path to the directory you want to insert.
+        * @return Returns true if the insertion succeeded
+	*/
+	public boolean insertCSVDirectory(final String dirPath) {
 		File directory = new File(dirPath);
                 
                 FilenameFilter filter = new FilenameFilter() {
@@ -62,12 +70,14 @@ public class CSVReader {
                 };
                 
                 File[] files = directory.listFiles(filter);
+                boolean success = true; 
                 
                 for(File file : files) {
                     if (file.isFile()){
-                        insertCSVFile(file.getPath());
+                        success = success && insertCSVFile(file.getPath());
                     }
                 }
+                return success;
 
 	}
 

@@ -68,10 +68,14 @@ public class FXMLAdamController implements Initializable {
 	if (isFilePath(filePath)){
             if(isCSVFile(filePath)){
                 
-		reader.insertCSVFile(filePath);
-                
-                importActionTarget.setFill(Color.BLUE);
-                importActionTarget.setText("Import succesfull!"); //TODO Add some succesfull test.
+		if(reader.insertCSVFile(filePath)){        
+                    importActionTarget.setFill(Color.BLUE);
+                    importActionTarget.setText("Import successfull!");
+                }
+                else{
+                    importActionTarget.setFill(Color.RED);
+                    importActionTarget.setText("Import unsuccessfull!");
+                }
                
                 File file = new File(filePath);
                 file = new File(file.getParent());
@@ -91,11 +95,16 @@ public class FXMLAdamController implements Initializable {
 	String dirPath = importSelectDirectoryTextField.getText();
         
 	if (isDirectoryPath(dirPath)){
-          
-		reader.insertCSVDirectory(dirPath);
+		if(reader.insertCSVDirectory(dirPath)){
+                    importActionTarget.setFill(Color.BLUE);
+                    importActionTarget.setText("Import successfull!");    
+                }
+                else{
+                    importActionTarget.setFill(Color.RED);
+                    importActionTarget.setText("Import unsuccessfull!");
+                }
                 
-                importActionTarget.setFill(Color.BLUE);
-                importActionTarget.setText("Import succesfull!"); //TODO Add some succesfull test.
+
                
                 File file = new File(dirPath);
                 file = new File(file.getParent());

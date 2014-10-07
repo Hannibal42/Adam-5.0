@@ -9,7 +9,9 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import java.io.DataInputStream;
 
 /**
  *
@@ -25,6 +27,8 @@ public class FXMLAdam extends Application {
         
         stage.setTitle("Adam 5.0");
         stage.setScene(scene);
+        //DataInputStream inputStream = new DataInputStream(); TODO:
+        stage.getIcons().add(new Image( "ftp://ftp.ifsr.de/fsr-logos/logo.jpg", true));
         stage.show();
     }
 
