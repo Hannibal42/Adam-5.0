@@ -11,7 +11,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import java.io.DataInputStream;
 
 /**
  *
@@ -27,8 +26,15 @@ public class FXMLAdam extends Application {
         
         stage.setTitle("Adam 5.0");
         stage.setScene(scene);
-        //DataInputStream inputStream = new DataInputStream(); TODO:
-        stage.getIcons().add(new Image( "ftp://ftp.ifsr.de/fsr-logos/logo.jpg", true));
+        
+        try {
+            String uristring = "file:" + System.getProperty("user.dir") + "/logo.png"; 
+            stage.getIcons().add(new Image(uristring));  //TODO: Can I do this in FXML? 
+        }
+        catch(Exception e){
+            System.out.println(e);
+        }
+        
         stage.show();
     }
 
