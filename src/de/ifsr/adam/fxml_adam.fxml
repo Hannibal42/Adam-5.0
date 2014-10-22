@@ -71,6 +71,11 @@
                            </font></Text>
                      </children>
                   </HBox>
+                  <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                     <children>
+                        <Button alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#handleDiagramRefrehButtonAction" text="Refresh" />
+                     </children>
+                  </HBox>
                </children>
             </GridPane>
       </content>

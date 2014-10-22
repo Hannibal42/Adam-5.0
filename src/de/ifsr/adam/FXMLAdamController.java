@@ -217,6 +217,11 @@ public class FXMLAdamController implements Initializable {
         return filePath.endsWith(".JSON") || filePath.endsWith(".json");
     }
     
+    @FXML
+    public void handleDiagramRefrehButtonAction(ActionEvent e){
+        diagramSelectClassChoiceBox.setItems(this.getTableNames());
+    }
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         

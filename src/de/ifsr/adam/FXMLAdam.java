@@ -22,7 +22,7 @@ public class FXMLAdam extends Application {
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("fxml_adam.fxml"));
         
-        Scene scene = new Scene(root, 250, 170);
+        Scene scene = new Scene(root);
         
         stage.setTitle("Adam 5.0");
         stage.setScene(scene);
