@@ -94,7 +94,6 @@ public class Report{
 		 	while(resultSet.next()){	
 		 		resultJSON.put(resultSet.getString(1),resultSet.getInt(2));
 		 	}
-
 		}
 		catch (SQLException e) {
 		 	System.out.println(e);
