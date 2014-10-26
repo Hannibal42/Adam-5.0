@@ -117,7 +117,7 @@ public class Report{
 	*/
 	public void writeReportToFile(String path, String fileName){
 		try{
-			File file = new File(path+ "/"+ fileName + ".json");
+			File file = new File(path+ "/"+ fileName);
 			file.delete();
 			file.createNewFile();
 

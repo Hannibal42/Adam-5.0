@@ -128,7 +128,7 @@ public class FXMLAdamController implements Initializable {
                 
                 Stage stage = (Stage) root.getScene().getWindow();
                 File file = diagramReportChooser.showSaveDialog(stage);
-                report.writeReportToFile(new File(file.getAbsolutePath() + ".json")); //TODO: Change this. A Diagram should be generated here.
+                report.writeReportToFile(new File(file.getAbsolutePath())); //TODO: Change this. A Diagram should be generated here.
                 
                 diagramActionTarget.setFill(Color.BLUE);
                 diagramActionTarget.setText("Diagrams generated!"); //TODO Add some succesfull test.
