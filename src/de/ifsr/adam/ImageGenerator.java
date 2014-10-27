@@ -15,15 +15,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
 import javafx.scene.Group;
-import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.stage.Stage;
 import javafx.scene.chart.*; //Make this more specific
 import java.util.ArrayList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.WritableImage;
 import javax.imageio.ImageIO;
+import javafx.scene.layout.GridPane;
 
 
 /**
@@ -107,7 +106,9 @@ public class ImageGenerator {
       
     public boolean generateImage(JSONArray resultReport){ //TODO: Make it private
         
-        
+        GridPane gridPane = new GridPane();
+        int x = 1;
+        int y = 1;
         for(int i = 0; i < resultReport.length(); i++){
             try {
                 JSONObject currentObject = resultReport.getJSONObject(i);
@@ -116,23 +117,33 @@ public class ImageGenerator {
                // JSONObject type = getAnswerType(currentObject.getString("type"));
                 //System.out.println(type);                    
                 //System.out.println(generateObservableList(currentObject.getJSONObject("result"), type));
-                ((Group) scene.getRoot()).getChildren().add(chart);
                 
-                WritableImage image = scene.snapshot(null);
-                File outFile = new File ("test.png");
-                try {
-                    ImageIO.write(SwingFXUtils.fromFXImage(image, null)
-                    , "png" , outFile);
+                gridPane.add(chart, x, y);
+                
+                if(x == 3){
+                    y += 1;
+                    x = 1; 
                 }
-                 catch(IOException ex) {
-                    System.out.println(ex.getMessage());
+                else{
+                    x += 1;
                 }
+
        
             }
             
             catch(JSONException e){
                 System.out.println(e); //TODO: Logging
             }
+        }
+        ((Group) scene.getRoot()).getChildren().add(gridPane);
+        WritableImage image = scene.snapshot(null);
+        File outFile = new File ("test.png");
+        try {
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null)
+            , "png" , outFile);
+        }
+        catch(IOException ex) {
+            System.out.println(ex.getMessage());
         }
         
         return true;
@@ -151,7 +162,7 @@ public class ImageGenerator {
             data = generateObservableList(result,answerType);
             System.out.println(data);
             chart = new PieChart(data);
-            chart.setTitle(surveyQuestion.getString("name"));
+            chart.setTitle(surveyQuestion.getString("text"));
         }
         catch(JSONException | NullPointerException e){
             System.out.println(e);

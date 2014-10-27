@@ -8,6 +8,7 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.layout.GridPane;
 /**
  *
  * @author Simon
@@ -15,10 +16,11 @@ import javafx.stage.Stage;
 public class TestScene extends Application {
     @Override
     public void start(Stage stage){
-        stage.setTitle("Importd Fruits");
-        stage.setWidth(500);
-        stage.setHeight(500);
-        Scene scene = new Scene(new Group());
+        stage.setTitle("Test");
+        Group root = new Group();
+        Scene scene = new Scene(root);
+        GridPane gridPane = new GridPane();
+        root.getChildren().add(gridPane);
         ImageGenerator gen = new ImageGenerator(scene);
         gen.generateImage(gen.importJSONArray(System.getProperty("user.dir") + "/resultReport.json"));
         
