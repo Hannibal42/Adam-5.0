@@ -1,80 +1,88 @@
 [
 	{
 		"type": "correctness",
-		"answers": [
-			"completely correct",
-			"mainly correct",
-			"partly",
-			"mainly incorrect",
-			"completely incorrect"
-		]
+		"answers": {
+			"":  "No answer given",
+			"1": "completely correct",
+			"2": "mainly correct",
+			"3": "partly",
+			"4": "mainly incorrect",
+			"5": "completely incorrect"
+		}
 	},
 	{
 		"type": "scale",
-		"answers": [
-			"way too extensive/fast/large",
-			"too extensive/fast/large",
-			"optimal",
-			"too limited/slow/small",
-			"way too limited/slow/small"
-		]
+		"answers": {
+			"":  "No answer given",
+			"1": "way too extensive/fast/large",
+			"2": "too extensive/fast/large",
+			"3": "optimal",
+			"4": "too limited/slow/small",
+			"5": "way too limited/slow/small"
+		}
 	},
 	{
 		"type": "number",
-		"answers": [
-			"never/0",
-			"1x/up to 1",
-			"2x/up to 2",
-			"3x/up to 3",
-			"more/more"
-		]
+		"answers": {
+			"":  "No answer given",
+			"1": "never/0",
+			"2": "1x/up to 1",
+			"3": "2x/up to 2",
+			"4": "3x/up to 3",
+			"5": "more/more"
+		}
 	},
 	{
 		"type": "usage",
-		"answers": [
-			"Yes, to a high degree.",
-			"Yes, sufficiently.",
-			"Yes, but too little.",
-			"No aids are used."
-		]
+		"answers": {
+			"":  "No answer given",
+			"1": "Yes, to a high degree.",
+			"2": "Yes, sufficiently.",
+			"3": "Yes, but too little.",
+			"4": "No aids are used."
+		}
 	},
 	{
 		"type": "binary",
-		"answers": [
-			"yes",
-			"no"
-		]
+		"answers": {
+			"":  "No answer given",
+			"1": "yes",
+			"2": "no"
+		}
 	},
 	{
 		"type": "sex",
-		"answers": [
-			"male",
-			"female"
-		]
+		"answers": {
+			"":  "No answer given",
+			"1": "male",
+			"2": "female"
+		}
 	},
 	{
 		"type": "degree",
-		"answers": [
-			"CL",
-			"CE",
-			"IST",
-			"Lehramt",
-			"Informatik Diplom",
-			"Informatik Bachelor",
-			"Medieninformatik Bachelor",
-			"Medieninformatik Diplom",
-			"Other"
-		]
+		"answers": {
+			"":  "No answer given",
+			"1": "CL",
+			"2": "CE",
+			"3": "IST",
+			"4": "Lehramt",
+			"5": "Informatik Diplom",
+ 			"6": "Informatik Bachelor",
+			"7": "Medieninformatik Bachelor",
+			"8": "Medieninformatik Diplom",
+			"9": "Other"
+		}
 	},
 	{
 		"type": "semester",
-		"answers": [
-			"1./2.",
-			"3./4.",
-			"5./6.",
-			"7./8.",
-			"9./10.",
-			">10"
-		]
+		"answers": {
+			"":  "No answer given",
+			"1": "1./2.",
+			"2": "3./4.",
+			"3": "5./6.",
+			"4": "7./8.",
+			"5": "9./10.",
+			"6":">10"
+		}
 	}
 ]
