@@ -5,24 +5,26 @@
  */
 package de.ifsr.adam;
 
+import org.json.*;
 import java.io.File;
 import java.io.IOException;
-import org.json.*;
-import javafx.scene.Scene;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Scanner;
+
+import javafx.scene.Scene;
 import javafx.scene.Group;
+import javafx.scene.chart.*; //Make this more specific
+import javafx.scene.image.WritableImage;
+import javafx.scene.layout.GridPane;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.chart.*; //Make this more specific
-import java.util.ArrayList;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.image.WritableImage;
 import javax.imageio.ImageIO;
-import javafx.scene.layout.GridPane;
+
 
 
 /**
@@ -112,12 +114,11 @@ public class ImageGenerator {
         for(int i = 0; i < resultReport.length(); i++){
             try {
                 JSONObject currentObject = resultReport.getJSONObject(i);
-                PieChart chart = generateDiagram(currentObject);
+                Chart chart = generatePieChart(currentObject);
                 //System.out.println(currentObject.getString("type"));
                // JSONObject type = getAnswerType(currentObject.getString("type"));
                 //System.out.println(type);                    
-                //System.out.println(generateObservableList(currentObject.getJSONObject("result"), type));
-                
+                //System.out.println(generateObservableList(currentObject.getJSONObject("result"), type))
                 gridPane.add(chart, x, y);
                 
                 if(x == 3){
@@ -127,7 +128,6 @@ public class ImageGenerator {
                 else{
                     x += 1;
                 }
-
        
             }
             
@@ -135,23 +135,88 @@ public class ImageGenerator {
                 System.out.println(e); //TODO: Logging
             }
         }
-        ((Group) scene.getRoot()).getChildren().add(gridPane);
-        WritableImage image = scene.snapshot(null);
-        File outFile = new File ("test.png");
-        try {
-            ImageIO.write(SwingFXUtils.fromFXImage(image, null)
-            , "png" , outFile);
-        }
-        catch(IOException ex) {
-            System.out.println(ex.getMessage());
-        }
         
-        return true;
+        ((Group) scene.getRoot()).getChildren().add(gridPane);
+ 
+        return this.printToFile();
     }
     
-    private PieChart generateDiagram(JSONObject question){ //TODO: Build in some logging for error handling.
-        ObservableList<PieChart.Data> data = null;
+    private boolean printToFile(){
+        WritableImage image = scene.snapshot(null);
+        File outFile = new File ("test." + formatName);
+        
+        try {
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null), formatName , outFile); 
+            return true;
+        }catch(IOException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    private BarChart generateBarChart(JSONObject question){
+        XYChart.Series data;
+        BarChart<Number,String> chart = null;
+        
+        try {
+            JSONObject surveyQuestion = getQuestion(question.getString("question"));
+            JSONObject answerType = getAnswerType(surveyQuestion.getString("type"));
+            JSONObject result = question.getJSONObject("result");
+            data = generateObservableListBarChart(result,answerType);
+            CategoryAxis yAxis = new CategoryAxis();
+            NumberAxis xAxis = new NumberAxis();
+            chart = new BarChart<Number,String>(xAxis,yAxis);
+            //TODO: set the Labels of the Axis
+            chart.getData().addAll(data);
+            chart.setTitle(surveyQuestion.getString("text"));
+            chart.setLegendVisible(false);
+        }
+        catch(JSONException e){
+            e.printStackTrace();
+        }
+        catch(NullPointerException e){
+            e.printStackTrace();
+        }
+      
+        return chart;
+    }
+    
+    private XYChart.Series generateObservableListBarChart(JSONObject result, JSONObject answerType){
+        XYChart.Series series = new XYChart.Series();
+        
+        try{
+            final JSONObject answers = answerType.getJSONObject("answers");
+            final String[] fieldNames = JSONObject.getNames(answers);
+            
+            for(int i = 1; i < fieldNames.length; i++){
+                System.out.println(fieldNames[i]);
+                String answer = answers.getString(fieldNames[i]);
+                
+                Integer value;
+                try {
+                    value = result.getInt(fieldNames[i]);
+                }
+                catch(JSONException e){
+                    value = 0;
+                }
+                
+                series.getData().add(new XYChart.Data(value,answer));            
+            }
+        }
+        catch(JSONException e){
+            
+            e.printStackTrace();
+        }
+        catch(NullPointerException e){
+            e.printStackTrace();
+        }
+        return series;
+    }
+    
+    private PieChart generatePieChart(JSONObject question){ //TODO: Build in some logging for error handling.
+        ObservableList<PieChart.Data> data;
         PieChart chart = null;
+        
         try {
             //System.out.println(question.getString("question"));
             JSONObject surveyQuestion = getQuestion(question.getString("question"));
@@ -159,34 +224,34 @@ public class ImageGenerator {
             JSONObject answerType = getAnswerType(surveyQuestion.getString("type"));
             //System.out.println(answerType);
             JSONObject result = question.getJSONObject("result");
-            data = generateObservableList(result,answerType);
-            System.out.println(data);
+            data = generateObservableListPieChart(result,answerType);
+            //System.out.println(data);
             chart = new PieChart(data);
             chart.setTitle(surveyQuestion.getString("text"));
         }
         catch(JSONException | NullPointerException e){
             System.out.println(e);
         }
+        
         return chart;
     }
     
-    public ObservableList<PieChart.Data> generateObservableList(JSONObject result, JSONObject answerType){
+    private ObservableList<PieChart.Data> generateObservableListPieChart(JSONObject result, JSONObject answerType){
         ArrayList<PieChart.Data> list= new ArrayList<PieChart.Data>();
-        
-        
+       
         try{
             final JSONObject answers = answerType.getJSONObject("answers");
-            final String [] fieldNames = JSONObject.getNames(result);
-            System.out.println(answers);
-            for(int i = 1; i < fieldNames.length; i++){
+            final String[] fieldNames = JSONObject.getNames(result);
+            //System.out.println(answers);
+            for(int i = 1; i < fieldNames.length; i++){//i is 1 at the start to ignore the empty String result in the answers
                 
-                System.out.println(fieldNames[i]);
+                //System.out.println(fieldNames[i]);
                 
                 String answer = answers.getString(fieldNames[i]);
-                System.out.println("answer:" + answer);
+               // System.out.println("answer:" + answer);
                 
                 Integer value = result.getInt(fieldNames[i]);
-                System.out.println("value: " + value);
+                //System.out.println("value: " + value);
                 
                 list.add(new PieChart.Data(answer,value));
             }
@@ -200,12 +265,6 @@ public class ImageGenerator {
         
         return FXCollections.observableArrayList(list);
     }
-    
-   
-    
-    
-    //TODO: Remove
-    
 
     
     
