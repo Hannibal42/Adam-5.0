@@ -6,6 +6,8 @@
 package de.ifsr.adam;
 
 import org.json.*;
+import org.apache.log4j.Logger;
+        
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -34,18 +36,29 @@ import javax.imageio.ImageIO;
 public class ImageGenerator {
     
     private final static Charset ENCODING = StandardCharsets.UTF_8; 
+    static Logger log = Logger.getLogger(ImageGenerator.class.getName());
+    private final JSONArray survey;
+    private final JSONArray answerTypes; 
+    private final Scene scene;
     private String formatName;
-    final private JSONArray survey;
-    final private JSONArray answerTypes; 
-    private Scene scene;
     
-  
-    ImageGenerator(String formatName){
+    
+    /**
+     * Constructs a new ImageGenerator with a given scene and image output format.
+     * @param formatName One of three basic formats .png, .jpeg or .gif
+     * @param scene The scene where the image is printed in
+     */
+    ImageGenerator(Scene scene, String formatName){
         this.formatName = formatName;
         survey = importJSONArray(System.getProperty("user.dir") + "/survey.json" ); //TODO: Make this more dynamic
         answerTypes = importJSONArray(System.getProperty("user.dir") + "/answerTypes.json");//TODO: Make this more dynamic
+        this.scene = scene;
     }
     
+    /**
+     * Constructs a new ImageGenerator with a given scene and the default format .png 
+     * @param scene The scene where the image is printed in
+     */
     ImageGenerator(Scene scene){
         survey = importJSONArray(System.getProperty("user.dir") + "/survey.json" ); //TODO: Make this more dynamic
         answerTypes = importJSONArray(System.getProperty("user.dir") + "/answerTypes.json");//TODO: Make this more dynamic
@@ -53,7 +66,12 @@ public class ImageGenerator {
         this.scene = scene;
     } 
     
-    public JSONArray importJSONArray(String filePath){ //TODO: Make this private.
+    /**
+     * Imports a JSONArray from a JSON file.
+     * @param filePath The file path to the JSONArray you want to import.
+     * @return 
+     */
+    public final JSONArray importJSONArray(String filePath){ //TODO: Make this private.
         Path path = Paths.get(filePath);
         String jsonStr = new String();
         JSONArray result = null; 
@@ -66,21 +84,38 @@ public class ImageGenerator {
             result = new JSONArray(jsonStr);
             
         }
-        catch(Exception e){
-           System.out.println(e); //Log this.
+        catch(IOException e){
+            log.error("Failed to find JSON File at: " + filePath,e); 
+        }
+        catch(JSONException e){
+            log.error("Not a valid JSON file at:" + filePath,e);   
         }
         return result;
     }   
     
+    /**
+     * Gets the value of the formatName.
+     * @return 
+     */
     public String getFormatName(){
         return formatName;
     }
     
+    /**
+     * Sets the value of the formatName.
+     * @param formatName 
+     */
     public void setFormatName(String formatName){
         this.formatName = formatName;
     }
     
-    //returns null if the Object is not in the Array
+    /**
+     * Searches a JSONArray for an JSONObject with a specific key and keyValue.
+     * @param array The JSONArray you want to search
+     * @param key The name of the JSONObject field that is searched 
+     * @param keyValue The Value of JSONObject field that is searched
+     * @return returns the first JSONObject that has the field and the right value, returns null if no JSONobject is found
+     */
     private JSONObject getSpecificObject(JSONArray array,String key, String keyValue){
         
         for(int i = 0; i < array.length(); i++){
@@ -91,56 +126,84 @@ public class ImageGenerator {
                 }
             }
             catch(JSONException e){
-                System.out.println(e);
+                log.error(e);
             }
         }
         
         return null;
     }
     
-    public JSONObject getAnswerType(String answerType){
+    /**
+     * Looks up the JSONObject answer type in answerTypes of a given type
+     * @param answerType The answer type 
+     * @return The JSONObject for the answer type, or null if the type was not found
+     */
+    private JSONObject getAnswerType(String answerType){
         return getSpecificObject(answerTypes,"type",answerType);
     }
     
-    public JSONObject getQuestion(String questionName){
+    /**
+     * Looks up the JSONObject question in survey of a given question
+     * @param questionName The question
+     * @return The JSONObject for the question, or null if the question was not found
+     */
+    private JSONObject getQuestion(String questionName){
         return getSpecificObject(survey,"name",questionName);
     }
-      
-    public boolean generateImage(JSONArray resultReport){ //TODO: Make it private
+    
+    /**
+     * Main method for generating an image out of a report with it results.
+     * @param resultReport The report with it results
+     * @return returns true if the generation and saving of the image was successful, false otherwise
+     */
+    public boolean generateImage(JSONArray resultReport){
+        log.info("Image generation has started");
         
         GridPane gridPane = new GridPane();
         int x = 1;
         int y = 1;
+        
         for(int i = 0; i < resultReport.length(); i++){
+            JSONObject currentObject = null;
+            String chartName = null;
+            Chart chart;
+            
             try {
-                JSONObject currentObject = resultReport.getJSONObject(i);
-                Chart chart = generatePieChart(currentObject);
-                //System.out.println(currentObject.getString("type"));
-               // JSONObject type = getAnswerType(currentObject.getString("type"));
-                //System.out.println(type);                    
-                //System.out.println(generateObservableList(currentObject.getJSONObject("result"), type))
-                gridPane.add(chart, x, y);
-                
-                if(x == 3){
-                    y += 1;
-                    x = 1; 
-                }
-                else{
-                    x += 1;
-                }
-       
+                currentObject = resultReport.getJSONObject(i);
+                chartName = currentObject.getString("view");
+            }
+            catch(JSONException e){
+                log.fatal(e);
+            }  
+            
+            switch(chartName){
+                case("bardiagram"): chart = generateBarChart(currentObject); break;
+                case("cakediagram"): chart = generatePieChart(currentObject); break;
+                default: chart = generateBarChart(currentObject); break;
             }
             
-            catch(JSONException e){
-                System.out.println(e); //TODO: Logging
+            gridPane.add(chart, x, y);  
+           
+            if(x == 3){
+                y += 1;
+                x = 1; 
+            }
+            else{
+                x += 1;
             }
         }
         
+        //Puts the gridPane on the scene.
         ((Group) scene.getRoot()).getChildren().add(gridPane);
  
+        log.info("End of image generation");
         return this.printToFile();
     }
     
+    /**
+     * Takes a snapshot of the scene and prints it to a file.
+     * @return 
+     */
     private boolean printToFile(){
         WritableImage image = scene.snapshot(null);
         File outFile = new File ("test." + formatName);
@@ -162,9 +225,11 @@ public class ImageGenerator {
             JSONObject surveyQuestion = getQuestion(question.getString("question"));
             JSONObject answerType = getAnswerType(surveyQuestion.getString("type"));
             JSONObject result = question.getJSONObject("result");
-            data = generateObservableListBarChart(result,answerType);
+            data = generateDataBarChart(result,answerType);
             CategoryAxis yAxis = new CategoryAxis();
+            yAxis.setAnimated(false);
             NumberAxis xAxis = new NumberAxis();
+            xAxis.setAnimated(false);
             chart = new BarChart<Number,String>(xAxis,yAxis);
             //TODO: set the Labels of the Axis
             chart.getData().addAll(data);
@@ -181,7 +246,7 @@ public class ImageGenerator {
         return chart;
     }
     
-    private XYChart.Series generateObservableListBarChart(JSONObject result, JSONObject answerType){
+    private XYChart.Series generateDataBarChart(JSONObject result, JSONObject answerType){
         XYChart.Series series = new XYChart.Series();
         
         try{
@@ -224,7 +289,7 @@ public class ImageGenerator {
             JSONObject answerType = getAnswerType(surveyQuestion.getString("type"));
             //System.out.println(answerType);
             JSONObject result = question.getJSONObject("result");
-            data = generateObservableListPieChart(result,answerType);
+            data = generateDataPieChart(result,answerType);
             //System.out.println(data);
             chart = new PieChart(data);
             chart.setTitle(surveyQuestion.getString("text"));
@@ -236,7 +301,7 @@ public class ImageGenerator {
         return chart;
     }
     
-    private ObservableList<PieChart.Data> generateObservableListPieChart(JSONObject result, JSONObject answerType){
+    private ObservableList<PieChart.Data> generateDataPieChart(JSONObject result, JSONObject answerType){
         ArrayList<PieChart.Data> list= new ArrayList<PieChart.Data>();
        
         try{
@@ -264,13 +329,5 @@ public class ImageGenerator {
         }
         
         return FXCollections.observableArrayList(list);
-    }
-
-    
-    
-    public static void main(String[] args){ //TODO: Remove   
-        //ImageGenerator gen = new ImageGenerator();
-       // gen.generateImage(gen.importJSONArray(System.getProperty("user.dir") + "/resultReport.json"));
-    }
-    
+    }  
 }
