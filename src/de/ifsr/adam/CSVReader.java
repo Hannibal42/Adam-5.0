@@ -1,5 +1,6 @@
 package de.ifsr.adam;
 
+import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -21,6 +22,7 @@ import java.sql.PreparedStatement;
 public class CSVReader {
 
 	private final static Charset ENCODING = StandardCharsets.UTF_8; 
+        static Logger log = Logger.getLogger(ImageGenerator.class.getName());
 
 	public CSVReader(){
 	}
@@ -33,7 +35,7 @@ public class CSVReader {
 	*/
 	public boolean insertCSVFile(final String filePath){
 		Path path = Paths.get(filePath);
-		List<List<String>> content = new ArrayList<List<String>>();
+		List<List<String>> content = new ArrayList<>();
 
 		try (Scanner scanner = new Scanner(path,ENCODING.name())){
 			
@@ -44,7 +46,7 @@ public class CSVReader {
 
 		}
 		catch (IOException e) {
-			System.out.println(e);
+			log.error(e);
                         return false;
 		}
 
@@ -62,12 +64,7 @@ public class CSVReader {
 	public boolean insertCSVDirectory(final String dirPath) {
 		File directory = new File(dirPath);
                 
-                FilenameFilter filter = new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String name){
-                        return name.toLowerCase().endsWith(".csv");
-                    }
-                };
+                FilenameFilter filter = (File dir, String name) -> name.toLowerCase().endsWith(".csv");
                 
                 File[] files = directory.listFiles(filter);
                 boolean success = true; 
@@ -107,7 +104,7 @@ public class CSVReader {
 			stmt.executeUpdate();
 		}
 		catch(SQLException e){
-			System.out.println(e);
+			log.error(e);
 		}
 
 	}
@@ -122,9 +119,9 @@ public class CSVReader {
 		tableName = this.cleanString(tableName);
 		String insertString = "INSERT INTO " + tableName + " VALUES(";
 
-		for (int i = 0 ; i < values.get(0).size(); i++) {
-			insertString += "?,";
-		}
+            for (String get : values.get(0)) {
+                insertString += "?,";
+            }
 
 		insertString = insertString.substring(0,insertString.length()-1); //Removes the last comma.
 		insertString += ")";
@@ -150,14 +147,14 @@ public class CSVReader {
 			ct.commit();
 		}
 		catch(SQLException e){
-			System.out.println(e);
+			log.error(e);
 		}
 		finally{
 			try{
 				ct.setAutoCommit(true);
 			}
 			catch(SQLException e){
-				System.out.println(e);
+				log.error(e);
 			}
 		}
 	}

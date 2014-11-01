@@ -7,20 +7,22 @@ package de.ifsr.adam;
 import java.sql.*;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 public class DBController {
 
 	private static final String DB_NAME = "Ergebnisse.db";
 	private static final DBController dbcontroller = new DBController();
 	private static Connection connection;
 	private static final String DB_PATH = System.getProperty("user.dir") + "/" + DB_NAME;
+        final static Logger log = Logger.getLogger(ImageGenerator.class.getName());
 
 	static {
 		try {
 			Class.forName("org.sqlite.JDBC");
 		}
 		catch (ClassNotFoundException e){
-			System.err.println("Fehler beim Laden des JDBC-Treibers");
-			e.printStackTrace();
+			log.error("Fehler beim Laden des JDBC-Treibers",e);
 		}
 	}
 
@@ -39,10 +41,10 @@ public class DBController {
 		try {
 			if (connection != null)
 				return;
-			System.out.println("Creating Connection to Database...");
+			log.info("Creating Connection to Database...");
 			connection = DriverManager.getConnection("jdbc:sqlite:" + DB_PATH);
 			if (!connection.isClosed())
-				System.out.println("...Connection established");
+				log.info("...Connection established");
 		}
 		catch(SQLException e){
 			throw new RuntimeException(e);
@@ -50,70 +52,72 @@ public class DBController {
 
  		//Creates a Thread that closes the DB Connection, runs when the Runtime is shutdown 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
+                    
+                        @Override
 			public void run(){
 				try {
 					if (!connection.isClosed() && connection != null){
 						connection.close();
 						if(connection.isClosed())
-							System.out.println("Connection to Database closed.");
+							log.info("Connection to Database closed.");
 					}					
 				}
 				catch (SQLException e){
-					e.printStackTrace();
+					log.error(e);
 				}
 			}
 		});
 	}
 
 
-	/**
-	* @param query A SQL query
-	* @return Creates a prepared statement.
-	*/
-	public PreparedStatement getPreparedStatement(String query) throws SQLException{
-			return connection.prepareStatement(query);
-	}
+    /**
+    * @param query A SQL query
+    * @return Creates a prepared statement.
+    * @throws java.sql.SQLException
+    */
+    public PreparedStatement getPreparedStatement(String query) throws SQLException{
+        return connection.prepareStatement(query);
+    }
 
-	/**
-	* @return Creates a statement.
-	*/
-	public Statement getStatement() throws SQLException {
-		return connection.createStatement();
-	}
+    /**
+    * @return Creates a statement.
+    * @throws java.sql.SQLException
+    */
+    public Statement getStatement() throws SQLException {
+	return connection.createStatement();
+    }
 
-	/**
-	* Sets the auto commit mode of the sql-database.
-	*/
-	public void setAutoCommit(Boolean mode) throws SQLException{
-		connection.setAutoCommit(mode);
-	}
+    /**
+    * Sets the auto commit mode of the sql-database.
+    * @param mode
+    * @throws java.sql.SQLException
+    */
+    public void setAutoCommit(Boolean mode) throws SQLException{
+	connection.setAutoCommit(mode);
+    }
 
-	/**
-	* commits all querys
-	*/
-	public void commit() throws SQLException{
-		connection.commit();
-	}
+    /**
+    * commits all querys
+    * @throws java.sql.SQLException
+    */
+    public void commit() throws SQLException{
+	connection.commit();
+    }
         
-        public ArrayList<String> getTableNames(){
-            initDBConnection();
-            String query = "SELECT name FROM sqlite_master WHERE type='table';";
-            ArrayList<String> tableNames = new ArrayList<String>();
-            try {
-                Statement stmt = connection.createStatement();
-                ResultSet resultSet = stmt.executeQuery(query);
-                while(resultSet.next()) {
-                    tableNames.add(resultSet.getString(1));
-                }
-            }
-            catch(Exception e){
-                System.out.println(e);
-            }
-            return tableNames;
+    public ArrayList<String> getTableNames(){
+        initDBConnection();
+        String query = "SELECT name FROM sqlite_master WHERE type='table';";
+        ArrayList<String> tableNames = new ArrayList<>();
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery(query);
+            while(resultSet.next()) {
+                tableNames.add(resultSet.getString(1));
+            }    
         }
-        
-        public static void main(String[] args){
-            DBController ct = DBController.getInstance();
-            System.out.println(ct.getTableNames());
+        catch(Exception e){
+            log.error(e);
         }
+        return tableNames;
+    }
 }

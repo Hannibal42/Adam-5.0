@@ -30,7 +30,7 @@ import javax.imageio.ImageIO;
 
 
 /**
- *
+ * Main class for image output generation.
  * @author Simon
  */
 public class ImageGenerator {
@@ -172,92 +172,128 @@ public class ImageGenerator {
                 currentObject = resultReport.getJSONObject(i);
                 chartName = currentObject.getString("view");
             }
-            catch(JSONException e){
+            catch(JSONException | NullPointerException e){
                 log.fatal(e);
-            }  
-            
-            switch(chartName){
-                case("bardiagram"): chart = generateBarChart(currentObject); break;
-                case("cakediagram"): chart = generatePieChart(currentObject); break;
-                default: chart = generateBarChart(currentObject); break;
             }
             
-            gridPane.add(chart, x, y);  
+            if(chartName != null){
+                switch(chartName){
+                    case("bardiagram"): chart = generateBarChart(currentObject); break;
+                    case("cakediagram"): chart = generatePieChart(currentObject); break;
+                    default: chart = generateBarChart(currentObject); break;
+                }
+            
+                gridPane.add(chart, x, y);  
            
-            if(x == 3){
-                y += 1;
-                x = 1; 
+                if(x == 3){
+                    y += 1;
+                    x = 1; 
+                }
+                else{
+                    x += 1;
+                }
             }
             else{
-                x += 1;
+                log.debug("ChartName was null of " + currentObject);
             }
         }
-        
         //Puts the gridPane on the scene.
         ((Group) scene.getRoot()).getChildren().add(gridPane);
  
         log.info("End of image generation");
-        return this.printToFile();
+        return this.printToFile("test");
     }
     
     /**
      * Takes a snapshot of the scene and prints it to a file.
-     * @return 
+     * @return True if no IOException occurred
      */
-    private boolean printToFile(){
+    private boolean printToFile(String fileName){
         WritableImage image = scene.snapshot(null);
-        File outFile = new File ("test." + formatName);
+        File outFile = new File (fileName + "." + formatName);
         
         try {
             ImageIO.write(SwingFXUtils.fromFXImage(image, null), formatName , outFile); 
             return true;
         }catch(IOException e){
-            e.printStackTrace();
+            log.error(e);
             return false;
         }
     }
     
+    /**
+     * Generates a bar chart
+     * @param question A question JSONObject of a report
+     * @return 
+     */
     private BarChart generateBarChart(JSONObject question){
+        
         XYChart.Series data;
         BarChart<Number,String> chart = null;
         
+        JSONObject surveyQuestion;
+        JSONObject answerType;
+        JSONObject result;
+        
         try {
-            JSONObject surveyQuestion = getQuestion(question.getString("question"));
-            JSONObject answerType = getAnswerType(surveyQuestion.getString("type"));
-            JSONObject result = question.getJSONObject("result");
+            
+            surveyQuestion = getQuestion(question.getString("question"));
+            try{
+                answerType = getAnswerType(surveyQuestion.getString("type"));
+            }
+            catch(NullPointerException e){
+                log.error( "The answerType of " +question+ " wasnt generated due to:",e);
+                return chart;
+            }
+   
+            result = question.getJSONObject("result");
             data = generateDataBarChart(result,answerType);
+            
+            //Axis
             CategoryAxis yAxis = new CategoryAxis();
-            yAxis.setAnimated(false);
+            yAxis.setAnimated(false); //Needs to be set, otherwise the labels are not printed to a file in the end.
             NumberAxis xAxis = new NumberAxis();
-            xAxis.setAnimated(false);
-            chart = new BarChart<Number,String>(xAxis,yAxis);
-            //TODO: set the Labels of the Axis
+            xAxis.setLabel("Votes"); //TODO: Multi Language support.
+            xAxis.setAnimated(false); //Needs to be set, otherwise the labels are not printed to a file in the end.
+            
+            chart = new BarChart<>(xAxis,yAxis);
             chart.getData().addAll(data);
             chart.setTitle(surveyQuestion.getString("text"));
             chart.setLegendVisible(false);
         }
         catch(JSONException e){
-            e.printStackTrace();
-        }
-        catch(NullPointerException e){
-            e.printStackTrace();
+            log.error(e);
         }
       
         return chart;
     }
     
+    /**
+     * Creates the data series needed for creating a bar chart.
+     * @param result The result JSONObject you wish to transform
+     * @param answerType The answer type JSONObject of the question
+     * @return 
+     */
     private XYChart.Series generateDataBarChart(JSONObject result, JSONObject answerType){
         XYChart.Series series = new XYChart.Series();
         
         try{
-            final JSONObject answers = answerType.getJSONObject("answers");
-            final String[] fieldNames = JSONObject.getNames(answers);
+            JSONObject answers;
+            String[] fieldNames;
             
-            for(int i = 1; i < fieldNames.length; i++){
-                System.out.println(fieldNames[i]);
+            try{
+                answers = answerType.getJSONObject("answers");
+                fieldNames = JSONObject.getNames(answers); 
+            }
+            catch(NullPointerException e){
+                log.error("Missing JSONObjects in:" + result + " " + answerType,e);
+                return series;
+            }
+            
+            for(int i = 1; i < fieldNames.length; i++){ //i initialized with 1 to ignore the empty string result
                 String answer = answers.getString(fieldNames[i]);
-                
                 Integer value;
+                
                 try {
                     value = result.getInt(fieldNames[i]);
                 }
@@ -268,64 +304,79 @@ public class ImageGenerator {
                 series.getData().add(new XYChart.Data(value,answer));            
             }
         }
-        catch(JSONException e){
-            
-            e.printStackTrace();
-        }
-        catch(NullPointerException e){
-            e.printStackTrace();
+        catch(JSONException e){            
+            log.error(e);
         }
         return series;
     }
     
+    /**
+     * Generates a pie chart.
+     * @param question A question JSONObject of a report
+     * @return 
+     */
     private PieChart generatePieChart(JSONObject question){ //TODO: Build in some logging for error handling.
         ObservableList<PieChart.Data> data;
         PieChart chart = null;
         
+        JSONObject surveyQuestion;
+        JSONObject answerType;
+        JSONObject result;
+        
         try {
-            //System.out.println(question.getString("question"));
-            JSONObject surveyQuestion = getQuestion(question.getString("question"));
-            //System.out.println(surveyQuestion);
-            JSONObject answerType = getAnswerType(surveyQuestion.getString("type"));
-            //System.out.println(answerType);
-            JSONObject result = question.getJSONObject("result");
+            surveyQuestion = getQuestion(question.getString("question"));
+            try {
+                answerType = getAnswerType(surveyQuestion.getString("type"));
+            }
+            catch(NullPointerException e){
+                log.error( "The answerType of " +question+ " wasnt generated due to:",e);
+                return chart;
+            }
+            
+            result = question.getJSONObject("result");
             data = generateDataPieChart(result,answerType);
-            //System.out.println(data);
+            
             chart = new PieChart(data);
             chart.setTitle(surveyQuestion.getString("text"));
         }
-        catch(JSONException | NullPointerException e){
-            System.out.println(e);
+        catch(JSONException e){
+            log.error(e);
         }
         
         return chart;
     }
     
+    
+    /**
+     * Creates the data list for a pie chart.
+     * @param result The result JSONObject you wish to transform
+     * @param answerType The answer type JSONObject of the question
+     * @return 
+     */
     private ObservableList<PieChart.Data> generateDataPieChart(JSONObject result, JSONObject answerType){
-        ArrayList<PieChart.Data> list= new ArrayList<PieChart.Data>();
+        ArrayList<PieChart.Data> list= new ArrayList<>();
        
         try{
-            final JSONObject answers = answerType.getJSONObject("answers");
-            final String[] fieldNames = JSONObject.getNames(result);
-            //System.out.println(answers);
+            JSONObject answers;
+            String[] fieldNames;
+            
+            try{
+                answers = answerType.getJSONObject("answers");
+                fieldNames = JSONObject.getNames(result);        
+            }
+            catch(NullPointerException e) {
+                log.error("Missing JSONObjects in:" + result + " " + answerType,e);
+                return FXCollections.observableArrayList(list);
+            }
+            
             for(int i = 1; i < fieldNames.length; i++){//i is 1 at the start to ignore the empty String result in the answers
-                
-                //System.out.println(fieldNames[i]);
-                
                 String answer = answers.getString(fieldNames[i]);
-               // System.out.println("answer:" + answer);
-                
                 Integer value = result.getInt(fieldNames[i]);
-                //System.out.println("value: " + value);
-                
                 list.add(new PieChart.Data(answer,value));
             }
         }
-        catch(NullPointerException e) {
-            System.out.println(e + " Es wurde kein Result fuer die Frage erstellt."); //Log
-        }
         catch(JSONException e){
-            System.out.println(e);
+            log.error(e);
         }
         
         return FXCollections.observableArrayList(list);

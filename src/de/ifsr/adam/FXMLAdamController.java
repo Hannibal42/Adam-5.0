@@ -54,7 +54,7 @@ public class FXMLAdamController implements Initializable {
             importActionTarget.setText("Choose only one");
         }
         if(!dirPath.equals("")){
-            importDirectory(event); //TODO: Build update function for the Choicebox
+            importDirectory(event); 
         }
         if(!filePath.equals("")){
             importSingleFile(event);
@@ -104,8 +104,6 @@ public class FXMLAdamController implements Initializable {
                     importActionTarget.setText("Import unsuccessfull!");
                 }
                 
-
-               
                 File file = new File(dirPath);
                 file = new File(file.getParent());
                 importDirectoryChooser.setInitialDirectory(file);
@@ -117,6 +115,7 @@ public class FXMLAdamController implements Initializable {
     
     @FXML
     private void handleDiagramSaveButtonAction(ActionEvent event) {
+        
         diagramActionTarget.setText(" ");
         String filePath = diagramSelectReportTextField.getText();
         String tableName = diagramSelectClassChoiceBox.getValue();
@@ -129,6 +128,10 @@ public class FXMLAdamController implements Initializable {
                 Stage stage = (Stage) root.getScene().getWindow();
                 File file = diagramReportChooser.showSaveDialog(stage);
                 report.writeReportToFile(new File(file.getAbsolutePath())); //TODO: Change this. A Diagram should be generated here.
+                
+                Stage stage2 = new Stage();
+                stage2.setScene(report.generateImage());
+                stage2.show();
                 
                 diagramActionTarget.setFill(Color.BLUE);
                 diagramActionTarget.setText("Diagrams generated!"); //TODO Add some succesfull test.
@@ -186,10 +189,7 @@ public class FXMLAdamController implements Initializable {
 
     /**
      * Checks if the file ends with .CSV or .csv
-     */
-    /**
-     *
-     * @param filePath the value of filePath
+     * @param filePath 
      */
     private Boolean isCSVFile(String filePath) {
         return (filePath.endsWith(".CSV") || filePath.endsWith(".csv"));
@@ -197,28 +197,31 @@ public class FXMLAdamController implements Initializable {
 
     /**
      * Checks if there is a file at the end of the path.
-     *
+     * @param filePath
      */
     private Boolean isFilePath(String filePath) {
         File file = new File(filePath);
         return file.isFile();
     }
-    
+    /**
+     * Checks if there is a directory at the end of the path.
+     * @param filePath
+     */
     private Boolean isDirectoryPath(String dirPath){
         File file = new File(dirPath);
         return file.isDirectory();
     }
 
     /**
-     *
-     * @param filePath the value of filePath
+     *  Checks if the file ends with .JSON or .json
+     * @param filePath 
      */
     private Boolean isJSONFile(String filePath) {
         return filePath.endsWith(".JSON") || filePath.endsWith(".json");
     }
     
     @FXML
-    public void handleDiagramRefrehButtonAction(ActionEvent e){
+    private void handleDiagramRefrehButtonAction(ActionEvent e){
         diagramSelectClassChoiceBox.setItems(this.getTableNames());
     }
     

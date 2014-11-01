@@ -11,12 +11,15 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author Simon
  */
 public class FXMLAdam extends Application {
+    
+    static Logger log = Logger.getLogger(ImageGenerator.class.getName());
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -32,7 +35,7 @@ public class FXMLAdam extends Application {
             stage.getIcons().add(new Image(uristring));  //TODO: Can I do this in FXML? 
         }
         catch(Exception e){
-            System.out.println(e);
+            log.error("Icon not loaded",e);
         }
         
         stage.show();

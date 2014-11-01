@@ -7,17 +7,24 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.PrintWriter;
 import java.io.File;
+import java.io.IOException;
 import java.util.Scanner;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+import org.apache.log4j.Logger;
 
+
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.layout.GridPane;
 /**
 * Main class for report handling, can construct a report from JSON file and has functionality for evaluating and saving the report.
 */
 public class Report{
 
-	private final static Charset ENCODING = StandardCharsets.UTF_8; 
+	private final static Charset ENCODING = StandardCharsets.UTF_8;
+        static Logger log = Logger.getLogger(ImageGenerator.class.getName());
 	private final String tableName;
 	private JSONArray report = null;
 	private Boolean result = false;
@@ -41,7 +48,7 @@ public class Report{
 
 		}
 		catch(Exception e){
-			System.out.println(e);
+			log.error(e);
 		}
 	}
 
@@ -53,11 +60,11 @@ public class Report{
 
 		for(int i = 0; i < report.length(); i++){	
 			try{
-				currentQuestion = report.getJSONObject(i); //getJSONObject is reference but the doc says its by value
-				currentQuestion.put("result",getQuestionResult(currentQuestion));
+                            currentQuestion = report.getJSONObject(i); //getJSONObject is reference but the doc says its by value
+                            currentQuestion.put("result",getQuestionResult(currentQuestion));
 			}
 			catch(Exception e){
-				System.out.println(e);
+                            log.error("Could not create results for:" + report,e);
 			}
 		}
 		result = true;
@@ -96,7 +103,7 @@ public class Report{
 		 	}
 		}
 		catch (SQLException e) {
-		 	System.out.println(e);
+		 	log.error(e);
 		}
 
 		return resultJSON;
@@ -125,8 +132,8 @@ public class Report{
 			writer.println(this.report.toString(1));
 			writer.close();
 		}
-		catch(Exception e){
-			System.out.println(e);
+		catch(IOException | JSONException e){
+			log.error(e);
 		}
 	}
         
@@ -143,13 +150,11 @@ public class Report{
 		writer.println(this.report.toString(1));
 		writer.close();
             }
-            catch(Exception e){ //TODO:
-		System.out.println(e);
+            catch(IOException | JSONException e){ //TODO:
+		log.error(e);
             }
 	}
-        
-
-        
+            
 	/**
 	* @return The value of the result field.
 	*/
@@ -169,28 +174,33 @@ public class Report{
 		for(int i = 0; i < report.length(); i++){
 			
 			try{
-				curQuestion = report.getJSONObject(i);
-				questionName = curQuestion.getString("question");
+                            curQuestion = report.getJSONObject(i);
+                            questionName = curQuestion.getString("question");
 			}
-			catch(JSONException e){
-				System.out.println(e);
+			catch(JSONException | NullPointerException e){
+                            log.error(e);
 			}
 
 			if(question.equals(questionName)){
-				try {
-					return curQuestion.getJSONObject("result");
-				}
-				catch(JSONException e){
-				}
+                            try {
+                                return curQuestion.getJSONObject("result");
+                            }
+                            catch(JSONException e){
+                                log.error(e);
+                            }
 			}
 			
 		}
 		return null;
 	}
-
-	public static void main(String[] args){
-		Report report = new Report("C:/Users/Simon/Desktop/JAdam/data/report.json","b3CSV"); 
-		report.createResults();
-		report.writeReportToFile(System.getProperty("user.dir"),"Report");
-	}
+    
+    public Scene generateImage(){
+        Group root = new Group();
+        Scene scene = new Scene(root);
+        GridPane gridPane = new GridPane();
+        root.getChildren().add(gridPane);
+        ImageGenerator gen = new ImageGenerator(scene);
+        gen.generateImage(report);
+        return scene;
+    }
 }
