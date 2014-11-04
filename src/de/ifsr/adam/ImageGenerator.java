@@ -5,6 +5,8 @@
  */
 package de.ifsr.adam;
 
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import org.json.*;
 import org.apache.log4j.Logger;
         
@@ -22,8 +24,10 @@ import javafx.scene.Group;
 import javafx.scene.chart.*; //Make this more specific
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.ScrollPane;
 import javafx.embed.swing.SwingFXUtils;
 import javax.imageio.ImageIO;
 
@@ -184,7 +188,6 @@ public class ImageGenerator {
                 }
             
                 gridPane.add(chart, x, y);  
-           
                 if(x == 3){
                     y += 1;
                     x = 1; 
@@ -197,8 +200,29 @@ public class ImageGenerator {
                 log.debug("ChartName was null of " + currentObject);
             }
         }
+        
+        
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        HBox hbox = new HBox();
+        hbox.getChildren().add(gridPane);
+        hbox.setPrefWidth(Formats.DINA4_WIDTH);
+        hbox.setPrefHeight(Formats.DINA4_HEIGHT);
+        scrollPane.setContent(hbox);
+        //gridPane.getChildren().add(scrollPane);
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        int width = gd.getDisplayMode().getWidth();
+        int height = gd.getDisplayMode().getHeight();
+        
+        scrollPane.setVmax(100.0);
+        scrollPane.setPrefSize(Formats.DINA4_WIDTH,Formats.DINA4_HEIGHT); //TODO
+        
+        
+
+        
+        
         //Puts the gridPane on the scene.
-        ((Group) scene.getRoot()).getChildren().add(gridPane);
+        ((Group) scene.getRoot()).getChildren().addAll(scrollPane);
  
         log.info("End of image generation");
         return this.printToFile("test");
