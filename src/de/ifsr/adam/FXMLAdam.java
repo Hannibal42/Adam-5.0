@@ -12,6 +12,8 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.apache.log4j.Logger;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
 
 /**
  *
@@ -45,6 +47,8 @@ public class FXMLAdam extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        BasicConfigurator.configure();
+        Logger.getRootLogger().setLevel(Level.ERROR);
         launch(args);
     }
     

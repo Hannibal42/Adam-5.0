@@ -138,7 +138,7 @@ public class ImageGenerator {
     }
     
     /**
-     * Looks up the JSONObject answer type in answerTypes of a given type
+     * Looks up the JSONObject answer type in answerTypes
      * @param answerType The answer type 
      * @return The JSONObject for the answer type, or null if the type was not found
      */
@@ -147,12 +147,73 @@ public class ImageGenerator {
     }
     
     /**
-     * Looks up the JSONObject question in survey of a given question
+     * Looks up the JSONObject question in survey
      * @param questionName The question
      * @return The JSONObject for the question, or null if the question was not found
      */
-    private JSONObject getQuestion(String questionName){
+    private JSONObject getSurveyQuestion(String questionName){
         return getSpecificObject(survey,"name",questionName);
+    }
+    /**
+     * validates if a question has all required fields, a valid answerType and a valid survey question.
+     * @param question
+     * @return 
+     */
+    private boolean isValidQuestion(JSONObject question){
+        
+        String questionId;
+        
+        if(question == null){
+            return false;
+        }
+        
+        try {
+            questionId = question.getString("question");     
+        }
+        catch(JSONException e){
+            return false;
+        }
+        try {
+            question.getString("view");
+        }
+        catch(JSONException e){
+            return false;
+        }
+        return isValidSurveyQuestion(questionId);
+    }
+    /**
+     * 
+     * @param questionId
+     * @return 
+     */
+    private boolean isValidSurveyQuestion(String questionId){
+        
+        JSONObject surveyQuestion = getSurveyQuestion(questionId);
+        String questionType;
+        
+        if (surveyQuestion == null){
+            return false;
+        }
+        
+        try {
+            questionType = surveyQuestion.getString("type");
+        }
+        catch(JSONException e){
+            return false;
+        }
+
+        return isValidAnswerType(questionType);
+    }
+    
+    /**
+     * 
+     * @param questionType
+     * @return 
+     */
+    private boolean isValidAnswerType(String questionType){
+        
+        JSONObject answerType = getAnswerType(questionType);
+        return answerType != null;
     }
     
     /**
@@ -168,36 +229,36 @@ public class ImageGenerator {
         int y = 1;
         
         for(int i = 0; i < resultReport.length(); i++){
-            JSONObject currentObject = null;
+            JSONObject currentQuestion = null;
             String chartName = null;
             Chart chart;
             
             try {
-                currentObject = resultReport.getJSONObject(i);
-                chartName = currentObject.getString("view");
+                currentQuestion = resultReport.getJSONObject(i);
+                chartName = currentQuestion.getString("view");
             }
             catch(JSONException | NullPointerException e){
                 log.fatal(e);
             }
             
-            if(chartName != null){
+            if(chartName != null && isValidQuestion(currentQuestion)){
                 switch(chartName){
-                    case("bardiagram"): chart = generateBarChart(currentObject); break;
-                    case("cakediagram"): chart = generatePieChart(currentObject); break;
-                    default: chart = generateBarChart(currentObject); break;
+                    case("bardiagram"): chart = generateBarChart(currentQuestion); break;
+                    case("cakediagram"): chart = generatePieChart(currentQuestion); break;
+                    default: chart = generateBarChart(currentQuestion); break;
                 }
-            
-                gridPane.add(chart, x, y);  
-                if(x == 3){
-                    y += 1;
-                    x = 1; 
-                }
-                else{
-                    x += 1;
-                }
+                   
+            gridPane.add(chart, x, y);  
+            if(x == 3){
+                y += 1;
+                x = 1; 
             }
             else{
-                log.debug("ChartName was null of " + currentObject);
+                x += 1;
+            }
+            }
+            else{
+                log.debug("ChartName was null of " + currentQuestion);
             }
         }
         
@@ -209,31 +270,30 @@ public class ImageGenerator {
         hbox.setPrefWidth(Formats.DINA4_WIDTH);
         hbox.setPrefHeight(Formats.DINA4_HEIGHT);
         scrollPane.setContent(hbox);
-        //gridPane.getChildren().add(scrollPane);
+        
         GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         int width = gd.getDisplayMode().getWidth();
         int height = gd.getDisplayMode().getHeight();
         
         scrollPane.setVmax(100.0);
-        scrollPane.setPrefSize(Formats.DINA4_WIDTH,Formats.DINA4_HEIGHT); //TODO
-        
-        
-
-        
-        
+        scrollPane.setPrefSize(width * 0.5, height * 0.8); //TODO
+         
         //Puts the gridPane on the scene.
         ((Group) scene.getRoot()).getChildren().addAll(scrollPane);
  
         log.info("End of image generation");
-        return this.printToFile("test");
+        return this.printToFile("test", hbox);
     }
     
     /**
      * Takes a snapshot of the scene and prints it to a file.
      * @return True if no IOException occurred
      */
-    private boolean printToFile(String fileName){
-        WritableImage image = scene.snapshot(null);
+    private boolean printToFile(String fileName,HBox hbox){
+        Group root = new Group();
+        Scene printScene = new Scene(root);
+        ((Group) printScene.getRoot()).getChildren().addAll(hbox);
+        WritableImage image = printScene.snapshot(null);
         File outFile = new File (fileName + "." + formatName);
         
         try {
@@ -253,7 +313,7 @@ public class ImageGenerator {
     private BarChart generateBarChart(JSONObject question){
         
         XYChart.Series data;
-        BarChart<Number,String> chart = null;
+        BarChart<Number,String> chart;
         
         JSONObject surveyQuestion;
         JSONObject answerType;
@@ -261,13 +321,14 @@ public class ImageGenerator {
         
         try {
             
-            surveyQuestion = getQuestion(question.getString("question"));
+            surveyQuestion = getSurveyQuestion(question.getString("question"));
             try{
                 answerType = getAnswerType(surveyQuestion.getString("type"));
             }
             catch(NullPointerException e){
-                log.error( "The answerType of " +question+ " wasnt generated due to:",e);
-                return chart;
+                log.error( "The answerType of " +question+ " wasnt generated due to a Nullpointer");
+                log.debug("",e);
+                return null;
             }
    
             result = question.getJSONObject("result");
@@ -287,6 +348,7 @@ public class ImageGenerator {
         }
         catch(JSONException e){
             log.error(e);
+            return null;
         }
       
         return chart;
@@ -310,7 +372,8 @@ public class ImageGenerator {
                 fieldNames = JSONObject.getNames(answers); 
             }
             catch(NullPointerException e){
-                log.error("Missing JSONObjects in:" + result + " " + answerType,e);
+                log.error("Missing JSONObject in result:" + result + " answerType: " + answerType);
+                log.debug("",e);
                 return series;
             }
             
@@ -341,20 +404,21 @@ public class ImageGenerator {
      */
     private PieChart generatePieChart(JSONObject question){ //TODO: Build in some logging for error handling.
         ObservableList<PieChart.Data> data;
-        PieChart chart = null;
+        PieChart chart;
         
         JSONObject surveyQuestion;
         JSONObject answerType;
         JSONObject result;
         
         try {
-            surveyQuestion = getQuestion(question.getString("question"));
+            surveyQuestion = getSurveyQuestion(question.getString("question"));
             try {
                 answerType = getAnswerType(surveyQuestion.getString("type"));
             }
             catch(NullPointerException e){
-                log.error( "The answerType of " +question+ " wasnt generated due to:",e);
-                return chart;
+                log.error( "The answerType of " +question+ " wasnt generated due to a NullPointer");
+                log.debug("",e);
+                return null;
             }
             
             result = question.getJSONObject("result");
@@ -365,6 +429,7 @@ public class ImageGenerator {
         }
         catch(JSONException e){
             log.error(e);
+            return null;
         }
         
         return chart;
@@ -389,7 +454,8 @@ public class ImageGenerator {
                 fieldNames = JSONObject.getNames(result);        
             }
             catch(NullPointerException e) {
-                log.error("Missing JSONObjects in:" + result + " " + answerType,e);
+                log.error("Missing JSONObject in result:" + result + " answerType: " + answerType);
+                log.debug("",e);
                 return FXCollections.observableArrayList(list);
             }
             
