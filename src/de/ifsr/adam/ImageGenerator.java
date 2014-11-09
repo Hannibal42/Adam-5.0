@@ -29,6 +29,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ScrollPane;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Pos;
 import javax.imageio.ImageIO;
 
 
@@ -247,7 +248,7 @@ public class ImageGenerator {
                     case("cakediagram"): chart = generatePieChart(currentQuestion); break;
                     default: chart = generateBarChart(currentQuestion); break;
                 }
-                   
+            chart.setPrefSize(Formats.DINA4_WIDTH * 0.25, Formats.DINA4_WIDTH * 0.25);
             gridPane.add(chart, x, y);  
             if(x == 3){
                 y += 1;
@@ -266,6 +267,9 @@ public class ImageGenerator {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         HBox hbox = new HBox();
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.setPrefWidth(Formats.DINA4_WIDTH);
+        gridPane.setPrefHeight(Formats.DINA4_HEIGHT);
         hbox.getChildren().add(gridPane);
         hbox.setPrefWidth(Formats.DINA4_WIDTH);
         hbox.setPrefHeight(Formats.DINA4_HEIGHT);
