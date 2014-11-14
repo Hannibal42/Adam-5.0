@@ -58,7 +58,8 @@ public class FXMLAdamController implements Initializable {
         }
         if(!filePath.equals("")){
             importSingleFile(event);
-        }      
+        }
+        diagramSelectClassChoiceBox.setItems(this.getTableNames()); // Refresh the diagram table choice box
     }
     
     private void importSingleFile(ActionEvent event){
@@ -220,11 +221,6 @@ public class FXMLAdamController implements Initializable {
         return filePath.endsWith(".JSON") || filePath.endsWith(".json");
     }
     
-    @FXML
-    private void handleDiagramRefrehButtonAction(ActionEvent e){
-        diagramSelectClassChoiceBox.setItems(this.getTableNames());
-    }
-    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
@@ -243,8 +239,7 @@ public class FXMLAdamController implements Initializable {
         diagramReportChooser.getExtensionFilters().add(jsonFilter);
         
         diagramSelectClassChoiceBox.setItems(this.getTableNames());
-        
-        
+   
     }    
     
 }
