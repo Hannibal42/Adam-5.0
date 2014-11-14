@@ -30,6 +30,7 @@ public class FXMLAdam extends Application {
         Scene scene = new Scene(root);
         
         stage.setTitle("Adam 5.0");
+        stage.setResizable(false);
         stage.setScene(scene);
         
         try {

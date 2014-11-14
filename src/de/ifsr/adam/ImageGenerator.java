@@ -283,7 +283,11 @@ public class ImageGenerator {
         scrollPane.setPrefSize(width * 0.5, height * 0.8); //TODO
          
         //Puts the gridPane on the scene.
+        File file = new File("C:\\Users\\Simon\\Desktop\\Adam 5.0\\data\\ChartStyle.css");
+        scene.getStylesheets().add("file:///" + file.getAbsolutePath().replace("\\","/").replace(" ","%20")); //TODO: This is stupid, and i need something better to do this
+ 
         ((Group) scene.getRoot()).getChildren().addAll(scrollPane);
+        
  
         log.info("End of image generation");
         return this.printToFile("test", hbox);

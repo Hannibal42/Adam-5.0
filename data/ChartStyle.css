@@ -1,0 +1,15 @@
+.chart-bar {
+    -fx-bar-fill: #22bad9;
+    -fx-padding: 10px;
+    -fx-background-insets: 0,1,2;
+    -fx-background-radius: 0;
+}
+
+.axis {
+    -fx-font-size: 1.6em;
+    -fx-font-family: Tahoma;
+}
+
+.axis-label {
+    -fx-text-fill: #462300;
+}

@@ -131,7 +131,7 @@ public class FXMLAdamController implements Initializable {
                 report.writeReportToFile(new File(file.getAbsolutePath())); //TODO: Change this. A Diagram should be generated here.
                 
                 Stage stage2 = new Stage();
-                stage2.setScene(report.generateImage());
+                stage2.setScene(report.generateImage());           
                 stage2.show();
                 
                 diagramActionTarget.setFill(Color.BLUE);
