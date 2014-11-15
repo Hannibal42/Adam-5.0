@@ -18,9 +18,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Iterator;
 
 import javafx.scene.Scene;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.chart.*; //Make this more specific
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
@@ -46,7 +48,9 @@ public class ImageGenerator {
     private final JSONArray answerTypes; 
     private final Scene scene;
     private String formatName;
-    
+    private Integer imageHeight;
+    private Integer imageWidth;
+    private String stylesheetURI;
     
     /**
      * Constructs a new ImageGenerator with a given scene and image output format.
@@ -57,6 +61,8 @@ public class ImageGenerator {
         this.formatName = formatName;
         survey = importJSONArray(System.getProperty("user.dir") + "/survey.json" ); //TODO: Make this more dynamic
         answerTypes = importJSONArray(System.getProperty("user.dir") + "/answerTypes.json");//TODO: Make this more dynamic
+        imageHeight = Formats.DINA4_HEIGHT;
+        imageWidth = Formats.DINA4_WIDTH;
         this.scene = scene;
     }
     
@@ -67,6 +73,8 @@ public class ImageGenerator {
     ImageGenerator(Scene scene){
         survey = importJSONArray(System.getProperty("user.dir") + "/survey.json" ); //TODO: Make this more dynamic
         answerTypes = importJSONArray(System.getProperty("user.dir") + "/answerTypes.json");//TODO: Make this more dynamic
+        imageHeight = Formats.DINA4_HEIGHT;
+        imageWidth = Formats.DINA4_WIDTH;
         formatName = "png";
         this.scene = scene;
     } 
@@ -112,6 +120,22 @@ public class ImageGenerator {
      */
     public void setFormatName(String formatName){
         this.formatName = formatName;
+    }
+    
+    public Integer getImageHeight(){
+        return this.imageHeight;
+    }
+    
+    public void setImageHeight(Integer height){
+        this.imageHeight = height;
+    }
+    
+    public Integer getImageWidth(){
+        return this.imageWidth;
+    }
+    
+    public void setImageWidth(Integer width){
+        this.imageWidth = width;
     }
     
     /**
@@ -216,6 +240,13 @@ public class ImageGenerator {
         JSONObject answerType = getAnswerType(questionType);
         return answerType != null;
     }
+
+    private void calculateChartSize(Chart chart, Integer chartsPerRow, Integer chartsPerColumn){
+        Double prefHeight, prefWidth;
+        prefHeight = (imageHeight / chartsPerColumn) * 0.95;
+        prefWidth = (imageWidth / chartsPerRow) * 0.95;
+        chart.setPrefSize(prefWidth, prefHeight);
+    }
     
     /**
      * Main method for generating an image out of a report with it results.
@@ -248,8 +279,8 @@ public class ImageGenerator {
                     case("cakediagram"): chart = generatePieChart(currentQuestion); break;
                     default: chart = generateBarChart(currentQuestion); break;
                 }
-            chart.setPrefSize(Formats.DINA4_WIDTH * 0.25, Formats.DINA4_WIDTH * 0.25);
-            gridPane.add(chart, x, y);  
+            calculateChartSize(chart, 3, 3);
+            gridPane.add(chart, x, y); 
             if(x == 3){
                 y += 1;
                 x = 1; 
@@ -263,6 +294,8 @@ public class ImageGenerator {
             }
         }
         
+        gridPane.setHgap(Formats.DINA4_WIDTH * 0.10);
+        //gridPane.setVgap()
         
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
@@ -272,7 +305,7 @@ public class ImageGenerator {
         gridPane.setPrefHeight(Formats.DINA4_HEIGHT);
         hbox.getChildren().add(gridPane);
         hbox.setPrefWidth(Formats.DINA4_WIDTH);
-        hbox.setPrefHeight(Formats.DINA4_HEIGHT);
+        hbox.setPrefHeight(Formats.DINA4_HEIGHT);       
         scrollPane.setContent(hbox);
         
         GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -281,7 +314,7 @@ public class ImageGenerator {
         
         scrollPane.setVmax(100.0);
         scrollPane.setPrefSize(width * 0.5, height * 0.8); //TODO
-         
+
         //Puts the gridPane on the scene.
         File file = new File("C:\\Users\\Simon\\Desktop\\Adam 5.0\\data\\ChartStyle.css");
         scene.getStylesheets().add("file:///" + file.getAbsolutePath().replace("\\","/").replace(" ","%20")); //TODO: This is stupid, and i need something better to do this
@@ -300,6 +333,9 @@ public class ImageGenerator {
     private boolean printToFile(String fileName,HBox hbox){
         Group root = new Group();
         Scene printScene = new Scene(root);
+        //Puts the gridPane on the scene.
+        File file = new File("C:\\Users\\Simon\\Desktop\\Adam 5.0\\data\\ChartStyle.css");
+        scene.getStylesheets().add("file:///" + file.getAbsolutePath().replace("\\","/").replace(" ","%20")); //TODO: This is stupid, and i need something better to do this
         ((Group) printScene.getRoot()).getChildren().addAll(hbox);
         WritableImage image = printScene.snapshot(null);
         File outFile = new File (fileName + "." + formatName);

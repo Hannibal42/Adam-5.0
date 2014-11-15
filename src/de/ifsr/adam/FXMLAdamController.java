@@ -33,14 +33,47 @@ public class FXMLAdamController implements Initializable {
     private final File defaultDir = new File(System.getProperty("user.dir"));
     private final FileChooser importFileChooser = new FileChooser();
     private final FileChooser diagramReportChooser = new FileChooser();
+    private final FileChooser optionsJSONChooser = new FileChooser();
+    private final FileChooser optionsCSSChooser = new FileChooser();
     private final DirectoryChooser importDirectoryChooser = new DirectoryChooser();
     
     @FXML private TextField importSelectFileTextField;
     @FXML private TextField diagramSelectReportTextField;
     @FXML private TextField importSelectDirectoryTextField;
+    @FXML private TextField optionsSelectAnswerTypesTextField;
+    @FXML private TextField optionsSelectSurveyTextField;
+    @FXML private TextField optionsSelectChartStyleTextField;
     @FXML private Text importActionTarget;
     @FXML private Text diagramActionTarget;
     @FXML private ChoiceBox<String> diagramSelectClassChoiceBox;
+    
+    
+    @FXML private void handleOptionsSelectAnswerTypesButtonAction(ActionEvent event) {
+        Stage stage = (Stage) root.getScene().getWindow();
+        
+        File file = optionsJSONChooser.showOpenDialog(stage);
+        if (file != null){
+            optionsSelectAnswerTypesTextField.setText(file.getPath());
+        }     
+    }
+    
+    @FXML private void handleOptionsSelectSurveyButtonAction(ActionEvent event) {
+        Stage stage = (Stage) root.getScene().getWindow();
+        
+        File file = optionsJSONChooser.showOpenDialog(stage);
+        if (file != null){
+            optionsSelectSurveyTextField.setText(file.getPath());
+        }        
+    }
+    
+    @FXML private void handleOptionsSelectChartStyleButtonAction(ActionEvent event) {
+        Stage stage = (Stage) root.getScene().getWindow();
+        
+        File file = optionsCSSChooser.showOpenDialog(stage);
+        if (file != null){
+            optionsSelectChartStyleTextField.setText(file.getPath());
+        }        
+    }
     
     @FXML
     private void handleImportButtonAction(ActionEvent event){
@@ -222,24 +255,39 @@ public class FXMLAdamController implements Initializable {
     }
     
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        
-        importFileChooser.setInitialDirectory(defaultDir);
-        importFileChooser.setTitle("Choose a Class csv");
+    public void initialize(URL url, ResourceBundle rb) {  
         ExtensionFilter csvFilter;
         csvFilter = new ExtensionFilter("CSV Files(*.csv)","*.csv");
-        importFileChooser.getExtensionFilters().add(csvFilter);
-        
-        importDirectoryChooser.setTitle("Choose a Directory");
-        
-        diagramReportChooser.setInitialDirectory(defaultDir);
-        diagramReportChooser.setTitle("Choose a Report json");
         ExtensionFilter jsonFilter;
         jsonFilter = new ExtensionFilter("JSON Files(*.json)","*.json");
-        diagramReportChooser.getExtensionFilters().add(jsonFilter);
+        ExtensionFilter cssFilter;
+        cssFilter = new ExtensionFilter("CSS Files(*.css)","*.css");
+          
+        //Import tab initialize
+        importFileChooser.setInitialDirectory(defaultDir);
+        importFileChooser.setTitle("Choose a Class csv");
+        importFileChooser.getExtensionFilters().add(csvFilter);     
+        importDirectoryChooser.setTitle("Choose a Directory");
         
+        //Diagram tab initialize
+        diagramReportChooser.setInitialDirectory(defaultDir);
+        diagramReportChooser.setTitle("Choose a Report json");
+        diagramReportChooser.getExtensionFilters().add(jsonFilter);
         diagramSelectClassChoiceBox.setItems(this.getTableNames());
-   
+        
+        //Options tab initialize
+        optionsJSONChooser.setInitialDirectory(defaultDir);
+        optionsJSONChooser.setTitle("Choose as JSON file");
+        optionsJSONChooser.getExtensionFilters().add(jsonFilter);
+        
+        optionsCSSChooser.setInitialDirectory(defaultDir);
+        optionsCSSChooser.setTitle("Choose a Stylesheet");
+        optionsCSSChooser.getExtensionFilters().add(cssFilter);
+        
+        optionsSelectAnswerTypesTextField.setText(defaultDir + "\\answerTypes.json");
+        optionsSelectSurveyTextField.setText(defaultDir + "\\survey.json");
+        optionsSelectChartStyleTextField.setText(defaultDir + "\\ChartStyle.css");
+       
     }    
     
 }
