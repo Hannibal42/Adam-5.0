@@ -18,11 +18,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.Iterator;
 
 import javafx.scene.Scene;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.chart.*; //Make this more specific
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
@@ -335,7 +333,7 @@ public class ImageGenerator {
         Scene printScene = new Scene(root);
         //Puts the gridPane on the scene.
         File file = new File("C:\\Users\\Simon\\Desktop\\Adam 5.0\\data\\ChartStyle.css");
-        scene.getStylesheets().add("file:///" + file.getAbsolutePath().replace("\\","/").replace(" ","%20")); //TODO: This is stupid, and i need something better to do this
+        printScene.getStylesheets().add("file:///" + file.getAbsolutePath().replace("\\","/").replace(" ","%20")); //TODO: This is stupid, and i need something better to do this
         ((Group) printScene.getRoot()).getChildren().addAll(hbox);
         WritableImage image = printScene.snapshot(null);
         File outFile = new File (fileName + "." + formatName);
