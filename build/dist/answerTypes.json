@@ -1,0 +1,88 @@
+[
+	{
+		"type": "correctness",
+		"answers": {
+			"":  "No answer given",
+			"1": "completely correct",
+			"2": "mainly correct",
+			"3": "partly",
+			"4": "mainly incorrect",
+			"5": "completely incorrect"
+		}
+	},
+	{
+		"type": "scale",
+		"answers": {
+			"":  "No answer given",
+			"1": "way too extensive/fast/large",
+			"2": "too extensive/fast/large",
+			"3": "optimal",
+			"4": "too limited/slow/small",
+			"5": "way too limited/slow/small"
+		}
+	},
+	{
+		"type": "number",
+		"answers": {
+			"":  "No answer given",
+			"1": "never/0",
+			"2": "1x/up to 1",
+			"3": "2x/up to 2",
+			"4": "3x/up to 3",
+			"5": "more/more"
+		}
+	},
+	{
+		"type": "usage",
+		"answers": {
+			"":  "No answer given",
+			"1": "Yes, to a high degree.",
+			"2": "Yes, sufficiently.",
+			"3": "Yes, but too little.",
+			"4": "No aids are used."
+		}
+	},
+	{
+		"type": "binary",
+		"answers": {
+			"":  "No answer given",
+			"1": "yes",
+			"2": "no"
+		}
+	},
+	{
+		"type": "sex",
+		"answers": {
+			"":  "No answer given",
+			"1": "male",
+			"2": "female"
+		}
+	},
+	{
+		"type": "degree",
+		"answers": {
+			"":  "No answer given",
+			"1": "CL",
+			"2": "CE",
+			"3": "IST",
+			"4": "Lehramt",
+			"5": "Informatik Diplom",
+ 			"6": "Informatik Bachelor",
+			"7": "Medieninformatik Bachelor",
+			"8": "Medieninformatik Diplom",
+			"9": "Other"
+		}
+	},
+	{
+		"type": "semester",
+		"answers": {
+			"":  "No answer given",
+			"1": "1./2.",
+			"2": "3./4.",
+			"3": "5./6.",
+			"4": "7./8.",
+			"5": "9./10.",
+			"6":">10"
+		}
+	}
+]

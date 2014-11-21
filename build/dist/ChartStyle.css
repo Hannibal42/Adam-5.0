@@ -1,0 +1,28 @@
+.chart-bar {
+    -fx-bar-fill: #22bad9;
+    -fx-padding: 10px;
+    -fx-background-insets: 0,1,2;
+    -fx-background-radius: 0;
+}
+
+.chart-title {
+    -fx-alignment:top-left;
+    -fx-text-alignment:left;
+    -fx-wrap-text:true;
+    -fx-text-overrun:ellipsis;
+    /*-fx-font:; */
+    /*-fx-font-size:; */
+    -fx-underline:false;
+    /*-fx-graphic:; */
+    -fx-graphic-text-gap:4;
+    -fx-text-fill:black;
+}
+
+.axis {
+    -fx-font-size: 2.0em;
+    -fx-font-family: Tahoma;
+}
+
+.chart-pie-label {
+    -fx-pie-label-visible:false;
+}
