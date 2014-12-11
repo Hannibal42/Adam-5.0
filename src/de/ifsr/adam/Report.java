@@ -202,14 +202,17 @@ public class Report {
 
     /**
      * Generates a preview image of the diagrams
+     * @param surveyPath The path to the survey JSON File
+     * @param answerTypesPath The path to the answerTypes JSON File
+     * @param stylesheetPath The path to the style sheet 
      * @return The preview scene with diagrams and stuff.
      */
-    public Scene generateImage() {
+    public Scene generateImage(String surveyPath, String answerTypesPath, String stylesheetPath) {
 	Group root = new Group();
 	Scene scene = new Scene(root);
 	GridPane gridPane = new GridPane();
 	root.getChildren().add(gridPane);
-	ImageGenerator gen = new ImageGenerator(scene);
+	ImageGenerator gen = new ImageGenerator(scene,surveyPath,answerTypesPath,stylesheetPath);
 	gen.generateImage(report);
 	return scene;
     }

@@ -184,8 +184,11 @@ public class FXMLController implements Initializable {
                 File file = diagramReportChooser.showSaveDialog(stage);
                 report.writeReportToFile(new File(file.getAbsolutePath())); //TODO: Change this. A Diagram should be generated here.
                 
+		String surveyPath = optionsSelectSurveyTextField.getText();
+		String answerTypesPath = optionsSelectAnswerTypesTextField.getText();
+		String stylesheetPath = optionsSelectChartStyleTextField.getText();
                 Stage stage2 = new Stage();
-                stage2.setScene(report.generateImage());           
+                stage2.setScene(report.generateImage(surveyPath,answerTypesPath,stylesheetPath));           
                 stage2.show();
                 
                 diagramActionTarget.setFill(Color.BLUE);
