@@ -34,12 +34,12 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 
 /**
- *
+ * The Main.
  * @author Simon
  */
-public class FXMLAdam extends Application {
+public class Main extends Application {
     
-    static Logger log = Logger.getLogger(ImageGenerator.class.getName());
+    static Logger log = Logger.getLogger(Main.class.getName());
     
     @Override
     public void start(Stage stage) throws Exception {

@@ -40,12 +40,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.control.ChoiceBox;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+import org.apache.log4j.Logger;
 
 /**
- *
+ * The Controller that holds all the functions called by the GUI
  * @author Simon
  */
-public class FXMLAdamController implements Initializable {
+public class FXMLController implements Initializable {
+    static Logger log = Logger.getLogger(FXMLController.class.getName());
+    
     @FXML private Parent root; //I am rooooooooot!
     private final CSVReader reader = new CSVReader();
     private final File defaultDir = new File(System.getProperty("user.dir"));

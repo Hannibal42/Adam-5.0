@@ -30,7 +30,7 @@ THE SOFTWARE.
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<TabPane fx:id="root" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.ifsr.adam.FXMLAdamController">
+<TabPane fx:id="root" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.ifsr.adam.FXMLController">
   <tabs>
     <Tab text="Import">
       <content>
