@@ -32,18 +32,20 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import javafx.scene.Scene;
 import javafx.scene.Group;
 import javafx.scene.chart.*; //Make this more specific
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ScrollPane;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javax.imageio.ImageIO;
 
 /**
@@ -79,6 +81,8 @@ public class ImageGenerator {
 	formatName = "png";
     }
 
+    //TODO:Remove
+
     /**
      * Constructs a new ImageGenerator with a given scene and image output format. Only for quick
      * testing.
@@ -96,6 +100,8 @@ public class ImageGenerator {
 	this.scene = scene;
 	this.formatName = formatName;
     }
+
+    //TODO: Remove
 
     /**
      * Constructs a new ImageGenerator with a given scene and the default format .png Only for quick
@@ -115,22 +121,28 @@ public class ImageGenerator {
     }
 
     /**
-     * Sets the cascading style sheet for the diagrams
-     *
-     * @param filePath
-     */
-    public final void setStylesheet(String filePath) {
-	File file = new File(filePath);
-	this.stylesheetURI = file.toURI();
-    }
-
-    /**
      * Gets the value of the formatName.
      *
      * @return
      */
     public String getFormatName() {
 	return formatName;
+    }
+
+    /**
+     *
+     * @return The Width of the output image.
+     */
+    public Integer getImageWidth() {
+	return this.imageWidth;
+    }
+
+    /**
+     *
+     * @return The height of the output image.
+     */
+    public Integer getImageHeight() {
+	return this.imageHeight;
     }
 
     /**
@@ -142,109 +154,32 @@ public class ImageGenerator {
 	this.formatName = formatName;
     }
 
-    public Integer getImageHeight() {
-	return this.imageHeight;
-    }
-
+    /**
+     * Sets the height of the output image. Use the static member of Formats for this.
+     *
+     * @param height
+     */
     public void setImageHeight(Integer height) {
 	this.imageHeight = height;
     }
 
-    public Integer getImageWidth() {
-	return this.imageWidth;
-    }
-
+    /**
+     * Sets the width of the output image. Use the static members of Formats for this.
+     *
+     * @param width
+     */
     public void setImageWidth(Integer width) {
 	this.imageWidth = width;
     }
 
     /**
-     * Looks up the JSONObject answer type in answerTypes
+     * Sets the cascading style sheet for the diagrams
      *
-     * @param answerType The answer type
-     * @return The JSONObject for the answer type, or null if the type was not found
+     * @param filePath
      */
-    private JSONObject getAnswerType(String answerType) {
-	return JSONStuff.getSpecificObject(answerTypes, "type", answerType);
-    }
-
-    /**
-     * Looks up the JSONObject question in survey
-     *
-     * @param questionName The question
-     * @return The JSONObject for the question, or null if the question was not found
-     */
-    private JSONObject getSurveyQuestion(String questionName) {
-	return JSONStuff.getSpecificObject(survey, "name", questionName);
-    }
-
-    /**
-     * validates if a question has all required fields, a valid answerType and a valid survey
-     * question.
-     *
-     * @param question
-     * @return
-     */
-    private boolean isValidQuestion(JSONObject question) {
-
-	String questionId;
-
-	if (question == null) {
-	    return false;
-	}
-
-	try {
-	    questionId = question.getString("question");
-	} catch (JSONException e) {
-	    return false;
-	}
-	try {
-	    question.getString("view");
-	} catch (JSONException e) {
-	    return false;
-	}
-	return isValidSurveyQuestion(questionId);
-    }
-
-    /**
-     *
-     * @param questionId
-     * @return
-     */
-    private boolean isValidSurveyQuestion(String questionId) {
-
-	JSONObject surveyQuestion = getSurveyQuestion(questionId);
-	String questionType;
-
-	if (surveyQuestion == null) {
-	    return false;
-	}
-
-	try {
-	    questionType = surveyQuestion.getString("type");
-	} catch (JSONException e) {
-	    return false;
-	}
-
-	return isValidAnswerType(questionType);
-    }
-
-    /**
-     *
-     * @param questionType
-     * @return
-     */
-    private boolean isValidAnswerType(String questionType) {
-
-	JSONObject answerType = getAnswerType(questionType);
-	return answerType != null;
-    }
-
-    private void calculateChartSize(Chart chart, Integer chartsPerRow, Integer chartsPerColumn) {
-	Double prefHeight, prefWidth;
-	prefHeight = (imageHeight / chartsPerColumn) * 0.95;
-	prefWidth = (imageWidth / chartsPerRow) * 0.95;
-	chart.setPrefSize(prefWidth, prefHeight);
+    public final void setStylesheet(String filePath) {
+	File file = new File(filePath);
+	this.stylesheetURI = file.toURI();
     }
 
     /**
@@ -257,9 +192,94 @@ public class ImageGenerator {
     public boolean generateImage(JSONArray resultReport) {
 	log.info("Image generation has started");
 
+	ArrayList<Chart> chartList = generateCharts(resultReport);
+	ArrayList<GridPane> gridPaneList = makeLayout(chartList, 3, 2);
+
+	VBox vbox = new VBox();
+	vbox.getChildren().addAll(gridPaneList);
+	vbox.setPrefHeight(imageHeight * gridPaneList.size());
+
+	ScrollPane scrollPane = new ScrollPane();
+	scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+	scrollPane.setContent(vbox);
+
+	GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	int width = gd.getDisplayMode().getWidth();
+	int height = gd.getDisplayMode().getHeight();
+
+	scrollPane.setVmax(100.0);
+	scrollPane.setPrefSize(width * 0.65, height * 0.8); //TODO
+
+	scene.getStylesheets().add(this.stylesheetURI.toString());
+
+	((Group) scene.getRoot()).getChildren().addAll(scrollPane);
+
+	log.info("End of image generation");
+	return this.printToFile("test", vbox);
+    }
+
+    /**
+     * Puts the charts in chartList into GridPanes as specified by chartsPerColumn and chartsPerRow.
+     *
+     * @param chartList The ArrayList with the charts.
+     * @param chartsPerColumn Number of charts that are in one column.
+     * @param chartsPerRow Number of charts that are in one row.
+     * @return The list of GridPanes that were generated.
+     */
+    private ArrayList<GridPane> makeLayout(ArrayList<Chart> chartList, Integer chartsPerColumn, Integer chartsPerRow) {
+	ArrayList<GridPane> gridPaneList = new ArrayList<>();
 	GridPane gridPane = new GridPane();
-	int x = 1;
-	int y = 1;
+	int rowIndex = 0, columnIndex = 0;
+	Iterator<Chart> iter = chartList.iterator();
+
+	//int i = 0;//TODO: Remove 
+	while (iter.hasNext()) {
+	    //System.out.println("Run: "+ i + " columnIndex: " + columnIndex + " rowIndex: " + rowIndex);//TODO: Remove 
+	    //i++;//TODO: Remove 
+
+	    Chart chart = iter.next();
+	    calculateChartSize(chart, chartsPerColumn, chartsPerRow);
+	    gridPane.add(chart, columnIndex, rowIndex);
+
+	    columnIndex++;
+
+	    //Case: Row is full go to next row
+	    if (columnIndex >= chartsPerRow) {
+		columnIndex = 0;
+		rowIndex++;
+	    }
+
+	    //Case: Page is full start a new GridPane
+	    if (rowIndex >= chartsPerColumn) {
+		//The Layout for the gridPane
+		gridPane.setHgap(imageWidth * 0.10);
+		gridPane.setAlignment(Pos.CENTER);
+		gridPane.setPrefWidth(imageWidth);
+		gridPane.setPrefHeight(imageHeight);
+
+		gridPaneList.add(gridPane);
+		gridPane = new GridPane();
+		rowIndex = 0;
+	    }
+	}
+
+	//This needs to be check, or the last page can be empty
+	if (rowIndex != 0 || columnIndex != 0) {
+	    gridPaneList.add(gridPane);
+	}
+
+	return gridPaneList;
+    }
+
+    /**
+     * Generates a list of Charts out of a Report. Right now it can only create Cake- and
+     * Bardiagrams.
+     *
+     * @param resultReport The JSON representation of a report.
+     * @return
+     */
+    private ArrayList<Chart> generateCharts(JSONArray resultReport) {
+	ArrayList<Chart> chartList = new ArrayList<>();
 
 	for (int i = 0; i < resultReport.length(); i++) {
 	    JSONObject currentQuestion = null;
@@ -285,60 +305,27 @@ public class ImageGenerator {
 			chart = generateBarChart(currentQuestion);
 			break;
 		}
-		calculateChartSize(chart, 3, 3);
-		gridPane.add(chart, x, y);
-		if (x == 3) {
-		    y += 1;
-		    x = 1;
-		} else {
-		    x += 1;
-		}
+		chartList.add(chart);
 	    } else {
 		log.debug("ChartName was null of " + currentQuestion);
 	    }
 	}
 
-	gridPane.setHgap(Formats.DINA4_WIDTH * 0.10);
-	//gridPane.setVgap()
-
-	ScrollPane scrollPane = new ScrollPane();
-	scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-	HBox hbox = new HBox();
-	gridPane.setAlignment(Pos.CENTER);
-	gridPane.setPrefWidth(Formats.DINA4_WIDTH);
-	gridPane.setPrefHeight(Formats.DINA4_HEIGHT);
-	hbox.getChildren().add(gridPane);
-	hbox.setPrefWidth(Formats.DINA4_WIDTH);
-	hbox.setPrefHeight(Formats.DINA4_HEIGHT);
-	scrollPane.setContent(hbox);
-
-	GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-	int width = gd.getDisplayMode().getWidth();
-	int height = gd.getDisplayMode().getHeight();
-
-	scrollPane.setVmax(100.0);
-	scrollPane.setPrefSize(width * 0.5, height * 0.8); //TODO
-
-	scene.getStylesheets().add(this.stylesheetURI.toString());
-
-	((Group) scene.getRoot()).getChildren().addAll(scrollPane);
-
-	log.info("End of image generation");
-	return this.printToFile("test", hbox);
+	return chartList;
     }
 
     /**
-     * Takes a snapshot of the Hbox and prints it to a file.
+     * Takes a snapshot of the Pane and prints it to a file.
      *
      * @return True if no IOException occurred
      */
-    private boolean printToFile(String fileName, HBox hbox) {
+    private boolean printToFile(String fileName, Pane pane) {
 	Group root = new Group();
 	Scene printScene = new Scene(root);
 
 	printScene.getStylesheets().add(this.stylesheetURI.toString());
 
-	((Group) printScene.getRoot()).getChildren().addAll(hbox);
+	((Group) printScene.getRoot()).getChildren().addAll(pane);
 	WritableImage image = printScene.snapshot(null);
 	File outFile = new File(fileName + "." + formatName);
 
@@ -510,5 +497,101 @@ public class ImageGenerator {
 	}
 
 	return FXCollections.observableArrayList(list);
+    }
+
+    /**
+     * Looks up the JSONObject answer type in answerTypes
+     *
+     * @param answerType The answer type
+     * @return The JSONObject for the answer type, or null if the type was not found
+     */
+    private JSONObject getAnswerType(String answerType) {
+	return JSONStuff.getSpecificObject(answerTypes, "type", answerType);
+    }
+
+    /**
+     * Looks up the JSONObject question in survey
+     *
+     * @param questionName The question
+     * @return The JSONObject for the question, or null if the question was not found
+     */
+    private JSONObject getSurveyQuestion(String questionName) {
+	return JSONStuff.getSpecificObject(survey, "name", questionName);
+    }
+
+    /**
+     * validates if a question has all required fields, a valid answerType and a valid survey
+     * question.
+     *
+     * @param question
+     * @return
+     */
+    private boolean isValidQuestion(JSONObject question) {
+
+	String questionId;
+
+	if (question == null) {
+	    return false;
+	}
+
+	try {
+	    questionId = question.getString("question");
+	} catch (JSONException e) {
+	    return false;
+	}
+	try {
+	    question.getString("view");
+	} catch (JSONException e) {
+	    return false;
+	}
+	return isValidSurveyQuestion(questionId);
+    }
+
+    /**
+     *
+     * @param questionId
+     * @return
+     */
+    private boolean isValidSurveyQuestion(String questionId) {
+
+	JSONObject surveyQuestion = getSurveyQuestion(questionId);
+	String questionType;
+
+	if (surveyQuestion == null) {
+	    return false;
+	}
+
+	try {
+	    questionType = surveyQuestion.getString("type");
+	} catch (JSONException e) {
+	    return false;
+	}
+
+	return isValidAnswerType(questionType);
+    }
+
+    /**
+     *
+     * @param questionType
+     * @return
+     */
+    private boolean isValidAnswerType(String questionType) {
+
+	JSONObject answerType = getAnswerType(questionType);
+	return answerType != null;
+    }
+
+    /**
+     * Calculates the right size of the chart for the given parameters.
+     *
+     * @param chart
+     * @param chartsPerRow
+     * @param chartsPerColumn
+     */
+    private void calculateChartSize(Chart chart, Integer chartsPerColumn, Integer chartsPerRow) {
+	Double prefHeight, prefWidth;
+	prefHeight = (imageHeight / chartsPerColumn) * 0.95;
+	prefWidth = (imageWidth / chartsPerRow) * 0.95;
+	chart.setPrefSize(prefWidth, prefHeight);
     }
 }
