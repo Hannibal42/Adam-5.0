@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <!--
 The MIT License
 
@@ -127,9 +128,7 @@ THE SOFTWARE.
                     </rowConstraints>
                      <children>
                         <Label text="Chart Style:" GridPane.rowIndex="2" />
-                        <ChoiceBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                         <ChoiceBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                        <Label text="Output Format:" GridPane.rowIndex="3" />
                         <Label text="Output Layout:" GridPane.rowIndex="4" />
                         <Label text="Survey:" GridPane.rowIndex="1" />
                         <Label text="Answer Types:" />
@@ -139,6 +138,7 @@ THE SOFTWARE.
                         <Button mnemonicParsing="false" onAction="#handleOptionsSelectChartStyleButtonAction" text="Select" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                         <Button mnemonicParsing="false" onAction="#handleOptionsSelectSurveyButtonAction" text="Select" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                         <Button mnemonicParsing="false" onAction="#handleOptionsSelectAnswerTypesButtonAction" text="Select" GridPane.columnIndex="2" />
+                        <Button mnemonicParsing="false" onAction="#handleOptionsSaveLogButtonAction" text="Save Log to File" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                      </children>
                   </GridPane>
                </children>

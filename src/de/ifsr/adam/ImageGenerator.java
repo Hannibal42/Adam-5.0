@@ -64,7 +64,6 @@ public class ImageGenerator {
     private final JSONArray survey;
     private final JSONArray answerTypes;
     private final Scene scene;
-    private final Pane root;
     private String formatName;
     private Integer imageHeight;
     private Integer imageWidth;
@@ -83,8 +82,7 @@ public class ImageGenerator {
 	this.setStylesheet(stylesheetPath); //TODO: Make this more dynamic
 	imageHeight = Formats.DINA4_HEIGHT;
 	imageWidth = Formats.DINA4_WIDTH;
-	root = new VBox();
-	this.scene = new Scene(root);
+	this.scene = new Scene(new Group());
 	formatName = "png";
     }
 
@@ -106,7 +104,6 @@ public class ImageGenerator {
 	imageWidth = Formats.DINA4_WIDTH;
 	this.scene = scene;
 	this.formatName = formatName;
-	root = null;
     }
 
     //TODO: Remove
@@ -126,7 +123,6 @@ public class ImageGenerator {
 	imageWidth = Formats.DINA4_WIDTH;
 	formatName = "png";
 	this.scene = scene;
-	root = null;
     }
 
     /**

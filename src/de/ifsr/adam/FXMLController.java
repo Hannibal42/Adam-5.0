@@ -24,7 +24,10 @@
 package de.ifsr.adam;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -40,7 +43,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.control.ChoiceBox;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 /**
  * The Controller that holds all the functions called by the GUI
@@ -94,6 +100,22 @@ public class FXMLController implements Initializable {
         if (file != null){
             optionsSelectChartStyleTextField.setText(file.getPath());
         }        
+    }
+    
+    @FXML private void handleOptionsSaveLogButtonAction(ActionEvent event) {
+	Properties properties = new Properties();
+	try {
+	    properties.load(new FileReader(new File("C:\\Users\\Simon\\Desktop\\Adam 5.0\\properties\\log4j.properties"))); //TODO: Make this dynamic.
+	} 
+	catch (IOException ex) {
+	    BasicConfigurator.configure();
+	    Logger.getRootLogger().setLevel(Level.ERROR);
+	}
+	properties.setProperty("log4j.appender.FILE.immediateFlush", "true");
+	properties.setProperty("log", System.getProperty("user.dir") + "\\log");
+	PropertyConfigurator.configure(properties);
+	properties.setProperty("log4j.appender.FILE.immediateFlush", "false");
+	PropertyConfigurator.configure(properties);
     }
     
     @FXML

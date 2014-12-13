@@ -23,6 +23,10 @@
  */
 package de.ifsr.adam;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Properties;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -32,6 +36,7 @@ import javafx.stage.Stage;
 import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
+import org.apache.log4j.PropertyConfigurator;
 
 /**
  * The Main.
@@ -66,8 +71,16 @@ public class Main extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.ERROR);
+	Properties properties = new Properties();
+	try {
+	    properties.load(new FileReader(new File("C:\\Users\\Simon\\Desktop\\Adam 5.0\\properties\\log4j.properties"))); //TODO: Make this dynamic.
+	} 
+	catch (IOException ex) {
+	    
+	    Logger.getRootLogger().setLevel(Level.ERROR);
+	}
+	properties.setProperty("log", System.getProperty("user.dir") + "\\log");
+	PropertyConfigurator.configure(properties); 
         launch(args);
     }
     
