@@ -188,7 +188,7 @@ public class FXMLController implements Initializable {
 		String answerTypesPath = optionsSelectAnswerTypesTextField.getText();
 		String stylesheetPath = optionsSelectChartStyleTextField.getText();
                 Stage stage2 = new Stage();
-                stage2.setScene(report.generateImage(surveyPath,answerTypesPath,stylesheetPath));           
+                stage2.setScene(report.generateImage(surveyPath,answerTypesPath,stylesheetPath));     
                 stage2.show();
                 
                 diagramActionTarget.setFill(Color.BLUE);

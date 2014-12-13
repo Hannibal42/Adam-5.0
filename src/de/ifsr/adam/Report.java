@@ -208,12 +208,8 @@ public class Report {
      * @return The preview scene with diagrams and stuff.
      */
     public Scene generateImage(String surveyPath, String answerTypesPath, String stylesheetPath) {
-	Group root = new Group();
-	Scene scene = new Scene(root);
-	GridPane gridPane = new GridPane();
-	root.getChildren().add(gridPane);
-	ImageGenerator gen = new ImageGenerator(scene,surveyPath,answerTypesPath,stylesheetPath);
-	gen.generateImage(report);
+	ImageGenerator gen = new ImageGenerator(surveyPath,answerTypesPath,stylesheetPath);
+	Scene scene = gen.generateImage(report);
 	return scene;
     }
 }

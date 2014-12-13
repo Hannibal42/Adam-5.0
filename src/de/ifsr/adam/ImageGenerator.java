@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 import javafx.scene.Scene;
 import javafx.scene.Group;
@@ -44,6 +46,9 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ScrollPane;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.ColumnConstraintsBuilder;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javax.imageio.ImageIO;
@@ -59,6 +64,7 @@ public class ImageGenerator {
     private final JSONArray survey;
     private final JSONArray answerTypes;
     private final Scene scene;
+    private final Pane root;
     private String formatName;
     private Integer imageHeight;
     private Integer imageWidth;
@@ -71,13 +77,14 @@ public class ImageGenerator {
      * @param formatName One of three basic formats .png, .jpeg or .gif
      * @param scene The scene where the image is printed in
      */
-    ImageGenerator(Scene scene, String surveyPath, String answerTypesPath, String stylesheetPath) {
+    ImageGenerator(String surveyPath, String answerTypesPath, String stylesheetPath) {
 	survey = JSONStuff.importJSONArray(surveyPath);
 	answerTypes = JSONStuff.importJSONArray(answerTypesPath);//TODO: Make this more dynamic
 	this.setStylesheet(stylesheetPath); //TODO: Make this more dynamic
 	imageHeight = Formats.DINA4_HEIGHT;
 	imageWidth = Formats.DINA4_WIDTH;
-	this.scene = scene;
+	root = new VBox();
+	this.scene = new Scene(root);
 	formatName = "png";
     }
 
@@ -99,6 +106,7 @@ public class ImageGenerator {
 	imageWidth = Formats.DINA4_WIDTH;
 	this.scene = scene;
 	this.formatName = formatName;
+	root = null;
     }
 
     //TODO: Remove
@@ -118,6 +126,7 @@ public class ImageGenerator {
 	imageWidth = Formats.DINA4_WIDTH;
 	formatName = "png";
 	this.scene = scene;
+	root = null;
     }
 
     /**
@@ -189,7 +198,7 @@ public class ImageGenerator {
      * @return returns true if the generation and saving of the image was successful, false
      * otherwise
      */
-    public boolean generateImage(JSONArray resultReport) {
+    public Scene generateImage(JSONArray resultReport) {
 	log.info("Image generation has started");
 
 	ArrayList<Chart> chartList = generateCharts(resultReport);
@@ -210,12 +219,26 @@ public class ImageGenerator {
 	scrollPane.setVmax(100.0);
 	scrollPane.setPrefSize(width * 0.65, height * 0.8); //TODO
 
+	((Group) scene.getRoot()).getChildren().add(scrollPane);
 	scene.getStylesheets().add(this.stylesheetURI.toString());
-
-	((Group) scene.getRoot()).getChildren().addAll(scrollPane);
+	
+	//The Observer for resizing the scrollpane when the window changes.
+	scene.widthProperty().addListener(new ChangeListener<Number>() {
+	    @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+		scrollPane.setPrefWidth(newSceneWidth.doubleValue());
+	    }
+	});
+	
+	//The Observer for resizing the scrollpane when the window changes.
+	scene.heightProperty().addListener(new ChangeListener<Number>() {
+	    @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+		scrollPane.setPrefHeight(newSceneHeight.doubleValue());
+	    }
+	});
 
 	log.info("End of image generation");
-	return this.printToFile("test", vbox);
+	this.printToFile("test", vbox);
+	return scene;
     }
 
     /**
