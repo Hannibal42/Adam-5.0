@@ -27,8 +27,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.function.Predicate;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -43,6 +45,16 @@ import javafx.scene.paint.Color;
 import javafx.scene.control.ChoiceBox;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -55,7 +67,7 @@ import org.apache.log4j.PropertyConfigurator;
 public class FXMLController implements Initializable {
     static Logger log = Logger.getLogger(FXMLController.class.getName());
     
-    @FXML private Parent root; //I am rooooooooot!
+    
     private final CSVReader reader = new CSVReader();
     private final File defaultDir = new File(System.getProperty("user.dir"));
     private final FileChooser importFileChooser = new FileChooser();
@@ -63,7 +75,9 @@ public class FXMLController implements Initializable {
     private final FileChooser optionsJSONChooser = new FileChooser();
     private final FileChooser optionsCSSChooser = new FileChooser();
     private final DirectoryChooser importDirectoryChooser = new DirectoryChooser();
+    private  ObservableList<String> diagramObservableList;
     
+    @FXML private Parent root; //I am rooooooooot!
     @FXML private TextField importSelectFileTextField;
     @FXML private TextField diagramSelectReportTextField;
     @FXML private TextField importSelectDirectoryTextField;
@@ -73,6 +87,7 @@ public class FXMLController implements Initializable {
     @FXML private Text importActionTarget;
     @FXML private Text diagramActionTarget;
     @FXML private ChoiceBox<String> diagramSelectClassChoiceBox;
+    @FXML private ScrollPane reportEditor;
     
     
     @FXML private void handleOptionsSelectAnswerTypesButtonAction(ActionEvent event) {
@@ -300,6 +315,64 @@ public class FXMLController implements Initializable {
         return filePath.endsWith(".JSON") || filePath.endsWith(".json");
     }
     
+    @FXML
+    private void handleReportNewReportButtonAction(ActionEvent event) {
+	VBox vbox = new VBox();
+	reportEditor.setContent(vbox);
+	handleReportAddQuestionButtonAction(event);
+    }
+    
+    @FXML
+    public void handleReportAddQuestionButtonAction(ActionEvent e) {
+	VBox vbox ;
+	
+	try {
+	    vbox = (VBox) reportEditor.getContent();
+	} 
+	catch(Exception ex){
+	    vbox = new VBox();
+	    System.out.println(ex); //TODO: Logging
+	}
+	
+	GridPane gridPane = new GridPane();
+	
+	TextField question = new TextField();
+	Label questionLabel = new Label("Question:"); //TODO: Multilanguage support
+	gridPane.add(questionLabel, 0, 0);
+	gridPane.add(question, 1, 0);
+	
+	ChoiceBox diagram = new ChoiceBox();
+	diagram.setItems(diagramObservableList);
+	Label diagramLabel = new Label("Diagram:");//TODO: Multilanguage support
+	gridPane.add(diagramLabel, 0, 1);
+	gridPane.add(diagram, 1, 1);
+	
+	TextField comment = new TextField();
+	Label commentLabel = new Label("Comment:"); //TODO: Multilanguage support
+	gridPane.add(commentLabel, 0, 2);
+	gridPane.add(comment, 1,2);
+	
+	HBox buttonBox = new HBox();
+	buttonBox.setAlignment(Pos.CENTER);
+	Button button = new Button("Add Question");
+	button.setOnAction(new EventHandler<ActionEvent>() { 
+	    @Override public void handle(ActionEvent e) {
+		handleReportAddQuestionButtonAction(e);
+	    }
+	});
+	buttonBox.getChildren().add(button);
+	
+	try{//Removing the last "New Question" Button
+	    ObservableList<Node> children = vbox.getChildren();
+	    children.remove(children.size()-1);
+	}
+	catch(Exception ex){}
+	vbox.getChildren().add(gridPane);
+	vbox.getChildren().add(buttonBox);
+
+	reportEditor.setContent(vbox);	
+    }
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {  
         ExtensionFilter csvFilter;
@@ -333,6 +406,12 @@ public class FXMLController implements Initializable {
         optionsSelectAnswerTypesTextField.setText(defaultDir + "\\answerTypes.json");
         optionsSelectSurveyTextField.setText(defaultDir + "\\survey.json");
         optionsSelectChartStyleTextField.setText(defaultDir + "\\ChartStyle.css");
+	
+	//Report Editor Tap initialize
+	ArrayList<String> diagramsArrayList = new ArrayList();
+	diagramsArrayList.add("bardiagram");
+	diagramsArrayList.add("cakediagram");
+	diagramObservableList = FXCollections.observableList(diagramsArrayList);
        
     }    
     
