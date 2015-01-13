@@ -23,8 +23,10 @@
  */
 package de.ifsr.adam;
 
+import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.image.BufferedImage;
 import org.json.*;
 import org.apache.log4j.Logger;
 
@@ -46,12 +48,15 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ScrollPane;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.ColumnConstraintsBuilder;
+import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javax.imageio.ImageIO;
+import org.apache.pdfbox.exceptions.COSVisitorException;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.graphics.xobject.PDPixelMap;
 
 /**
  * Main class for image output generation.
@@ -233,7 +238,7 @@ public class ImageGenerator {
 	});
 
 	log.info("End of image generation");
-	this.printToFile("test", vbox);
+	this.printToPDF("test", vbox);
 	return scene;
     }
 
@@ -312,19 +317,23 @@ public class ImageGenerator {
 		log.fatal(e);
 	    }
 
-	    if (chartName != null && isValidQuestion(currentQuestion)) {
-		switch (chartName) {
-		    case ("bardiagram"):
-			chart = generateBarChart(currentQuestion);
-			break;
-		    case ("cakediagram"):
-			chart = generatePieChart(currentQuestion);
-			break;
-		    default:
-			chart = generateBarChart(currentQuestion);
-			break;
+	    if (chartName != null) {
+		if(isValidQuestion(currentQuestion)){
+		    switch (chartName) {
+			case ("bardiagram"):
+			    chart = generateBarChart(currentQuestion);
+			    break;
+			case ("cakediagram"):
+			    chart = generatePieChart(currentQuestion);
+			    break;
+			default:
+			    chart = generateBarChart(currentQuestion);
+			    break;
+		    }
+		    chartList.add(chart);
+		} else {
+		    log.debug("Not a valid Question :" + currentQuestion);
 		}
-		chartList.add(chart);
 	    } else {
 		log.debug("ChartName was null of " + currentQuestion);
 	    }
@@ -333,6 +342,55 @@ public class ImageGenerator {
 	return chartList;
     }
 
+       /**
+     * Takes a snapshot of the Pane and prints it to a pdf.
+     *
+     * @return True if no IOException occurred
+     */
+    private boolean printToPDF(String fileName, Pane pane) {
+	Group root = new Group();
+	Scene printScene = new Scene(root);
+	printScene.getStylesheets().add(this.stylesheetURI.toString());
+	
+	GridPane gridPane;
+	try{
+	    ObservableList<Node> panes = pane.getChildren();
+	    System.out.println(panes.size());
+	    gridPane = (GridPane)panes.get(1);
+	}catch(Exception e){
+	    log.error(e);
+	    return false;
+	}
+	
+
+	((Group) printScene.getRoot()).getChildren().addAll(gridPane);
+	WritableImage image = printScene.snapshot(null);
+	
+	File outFile = new File(fileName + "." + "pdf");
+	PDDocument doc = new PDDocument();
+	PDPage page = new PDPage();
+	doc.addPage(page);
+	
+	try{
+	    PDPageContentStream contentStream = new PDPageContentStream(doc,page,true, false);
+	    
+	    BufferedImage bufImage = SwingFXUtils.fromFXImage(image, null);
+	    PDPixelMap pixelMap = new PDPixelMap(doc,bufImage);
+	    Dimension dim = new Dimension((int)page.getMediaBox().getWidth(),(int)page.getMediaBox().getHeight());
+	    
+	    contentStream.drawXObject(pixelMap, 0, 0, dim.width, dim.height);
+	    contentStream.close();
+	    doc.save(outFile);
+	    return true;
+	}catch(IOException | COSVisitorException e){
+	    log.error(e);
+	    return false;
+	}
+	finally{
+	    pane.getChildren().add(gridPane);
+	}
+    } 
+    
     /**
      * Takes a snapshot of the Pane and prints it to a file.
      *

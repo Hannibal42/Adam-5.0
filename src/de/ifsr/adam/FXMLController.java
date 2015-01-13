@@ -30,7 +30,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.function.Predicate;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -46,7 +45,6 @@ import javafx.scene.control.ChoiceBox;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -319,6 +317,7 @@ public class FXMLController implements Initializable {
     private void handleReportNewReportButtonAction(ActionEvent event) {
 	VBox vbox = new VBox();
 	reportEditor.setContent(vbox);
+	vbox.setAlignment(Pos.TOP_CENTER);
 	handleReportAddQuestionButtonAction(event);
     }
     
@@ -334,6 +333,7 @@ public class FXMLController implements Initializable {
 	    System.out.println(ex); //TODO: Logging
 	}
 	
+	vbox.setAlignment(Pos.TOP_CENTER);
 	GridPane gridPane = new GridPane();
 	
 	TextField question = new TextField();
