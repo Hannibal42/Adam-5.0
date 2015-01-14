@@ -84,5 +84,31 @@
 			"5": "9./10.",
 			"6":">10"
 		}
+	},
+	{
+		"type":"F17",
+		"answers": {
+			"": "Keine Antwort",
+            "1": "Pflichtveranstaltung", 
+            "2":"studium generale", 
+            "3": "Scheinerwerb/ Klausur", 
+            "4": "Stoff ist relevant f\u00fcr Zwischen- /Abschlusspr\u00fcfung", 
+            "5": "aus pers\u00f6nlichem Interesse am Stoff", 
+            "6": "wegen der Lehrperson", 
+            "7": "andere Besuchsgr\u00fcnde"
+        }
+	},
+	{
+		"type": "F15",
+		"answers": {
+			"": "Keine Antwort",
+            "1": "musste jobben", 
+            "2": "war krank", 
+            "3": "verhindert wegen einer anderen Veranstaltung", 
+            "4": "verschlafen", 
+            "5": "geringes Interesse", 
+            "6": "verhindert wegen Gremienarbeit", 
+            "7": "andere Gr\u00fcnde"
+        },
 	}
 ]

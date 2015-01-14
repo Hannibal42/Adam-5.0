@@ -191,54 +191,76 @@ public class ImageGenerator {
 	File file = new File(filePath);
 	this.stylesheetURI = file.toURI();
     }
-
-    /**
-     * Main method for generating an image out of a report with it results.
-     *
-     * @param resultReport The report with it results
-     * @return returns true if the generation and saving of the image was successful, false
-     * otherwise
-     */
-    public Scene generateImage(JSONArray resultReport) {
-	log.info("Image generation has started");
-
+    
+    private VBox generateImageVBox(JSONArray resultReport){
 	ArrayList<Chart> chartList = generateCharts(resultReport);
 	ArrayList<GridPane> gridPaneList = makeLayout(chartList, 3, 2);
 
 	VBox vbox = new VBox();
 	vbox.getChildren().addAll(gridPaneList);
 	vbox.setPrefHeight(imageHeight * gridPaneList.size());
+	
+	return vbox;
+    }
+    
+        /**
+     * Main method for generating an PDF out of a report with it results.
+     *
+     * @param resultReport The report with it results
+     * @param filePath The path to the output file.
+     * @return returns true if the generation and saving of the image was successful, false
+     * otherwise
+     */
+    public boolean generatePDF(JSONArray resultReport,String filePath) {
+	log.info("PDF generation has started");
+	VBox vbox = generateImageVBox(resultReport);
+	log.info("End of PDF generation");
+	return this.printToPDF(filePath,vbox);
+    }
+
+    /**
+     * Main method for generating an Preview out of a report with it results.
+     *
+     * @param resultReport The report with it results
+     * @return returns true if the generation and saving of the image was successful, false
+     * otherwise
+     */
+    public Scene generatePreview(JSONArray resultReport) {
+	log.info("Preview generation has started");
+	VBox vbox = generateImageVBox(resultReport);
 
 	ScrollPane scrollPane = new ScrollPane();
 	scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
 	scrollPane.setContent(vbox);
 
+	//Gets the screen resulution for scaling.
 	GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 	int width = gd.getDisplayMode().getWidth();
 	int height = gd.getDisplayMode().getHeight();
 
 	scrollPane.setVmax(100.0);
-	scrollPane.setPrefSize(width * 0.65, height * 0.8); //TODO
+	scrollPane.setPrefSize(width * 0.65, height * 0.8); //TODO Can I do this better?
 
 	((Group) scene.getRoot()).getChildren().add(scrollPane);
 	scene.getStylesheets().add(this.stylesheetURI.toString());
 	
 	//The Observer for resizing the scrollpane when the window changes.
 	scene.widthProperty().addListener(new ChangeListener<Number>() {
-	    @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+	    @Override public void changed(ObservableValue<? extends Number> observableValue,
+		    Number oldSceneWidth, Number newSceneWidth) {
 		scrollPane.setPrefWidth(newSceneWidth.doubleValue());
 	    }
 	});
 	
 	//The Observer for resizing the scrollpane when the window changes.
 	scene.heightProperty().addListener(new ChangeListener<Number>() {
-	    @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+	    @Override public void changed(ObservableValue<? extends Number> observableValue, 
+		    Number oldSceneHeight, Number newSceneHeight) {
 		scrollPane.setPrefHeight(newSceneHeight.doubleValue());
 	    }
 	});
 
-	log.info("End of image generation");
-	this.printToPDF("test", vbox);
+	log.info("End of Preview generation");
 	return scene;
     }
 
@@ -332,7 +354,7 @@ public class ImageGenerator {
 		    }
 		    chartList.add(chart);
 		} else {
-		    log.debug("Not a valid Question :" + currentQuestion);
+		    log.debug("Question :" + currentQuestion);
 		}
 	    } else {
 		log.debug("ChartName was null of " + currentQuestion);
@@ -342,52 +364,61 @@ public class ImageGenerator {
 	return chartList;
     }
 
-       /**
+    /**
      * Takes a snapshot of the Pane and prints it to a pdf.
      *
      * @return True if no IOException occurred
      */
-    private boolean printToPDF(String fileName, Pane pane) {
+    private boolean printToPDF(String filePath, Pane pane) {
+	//Scene set up
 	Group root = new Group();
 	Scene printScene = new Scene(root);
 	printScene.getStylesheets().add(this.stylesheetURI.toString());
 	
-	GridPane gridPane;
+	//Snapshot generation
+	ArrayList<WritableImage> images = new ArrayList<>();
 	try{
 	    ObservableList<Node> panes = pane.getChildren();
-	    System.out.println(panes.size());
-	    gridPane = (GridPane)panes.get(1);
+	    for(int i=0; i < panes.size(); i++){
+		GridPane gridPane = (GridPane)panes.get(i);
+		((Group) printScene.getRoot()).getChildren().clear();
+		((Group) printScene.getRoot()).getChildren().addAll(gridPane);
+		images.add(printScene.snapshot(null));
+		panes.add(i, gridPane);
+	    }
 	}catch(Exception e){
 	    log.error(e);
 	    return false;
 	}
 	
-
-	((Group) printScene.getRoot()).getChildren().addAll(gridPane);
-	WritableImage image = printScene.snapshot(null);
-	
-	File outFile = new File(fileName + "." + "pdf");
+	//PDF Setup
+	File outFile = new File(filePath + "." + "pdf");
+	Iterator<WritableImage> iterImages = images.iterator();
 	PDDocument doc = new PDDocument();
-	PDPage page = new PDPage();
-	doc.addPage(page);
 	
 	try{
-	    PDPageContentStream contentStream = new PDPageContentStream(doc,page,true, false);
 	    
-	    BufferedImage bufImage = SwingFXUtils.fromFXImage(image, null);
-	    PDPixelMap pixelMap = new PDPixelMap(doc,bufImage);
-	    Dimension dim = new Dimension((int)page.getMediaBox().getWidth(),(int)page.getMediaBox().getHeight());
+	    while(iterImages.hasNext()){
+		//Page setup
+		PDPage page = new PDPage();
+		doc.addPage(page);
+		PDPageContentStream contentStream = new PDPageContentStream(doc,page,true, false);
+	    	//Image setup
+		BufferedImage bufImage = SwingFXUtils.fromFXImage(iterImages.next(), null);
+		PDPixelMap pixelMap = new PDPixelMap(doc,bufImage);
+		
+		int width = (int)(page.getMediaBox().getWidth());
+		int height = (int)(page.getMediaBox().getHeight());
+		Dimension dim = new Dimension(width,height);
+		contentStream.drawXObject(pixelMap, 0, 0, dim.width, dim.height);
+		contentStream.close();
+	    }
 	    
-	    contentStream.drawXObject(pixelMap, 0, 0, dim.width, dim.height);
-	    contentStream.close();
 	    doc.save(outFile);
 	    return true;
 	}catch(IOException | COSVisitorException e){
 	    log.error(e);
 	    return false;
-	}
-	finally{
-	    pane.getChildren().add(gridPane);
 	}
     } 
     
@@ -448,7 +479,7 @@ public class ImageGenerator {
 	    CategoryAxis yAxis = new CategoryAxis();
 	    yAxis.setAnimated(false); //Needs to be set, otherwise the labels are not printed to a file in the end.
 	    NumberAxis xAxis = new NumberAxis();
-	    xAxis.setLabel("Votes"); //TODO: Multi Language support.
+	    xAxis.setLabel("Stimmen"); //TODO: Multi Language support.
 	    xAxis.setAnimated(false); //Needs to be set, otherwise the labels are not printed to a file in the end.
 
 	    chart = new BarChart<>(xAxis, yAxis);
@@ -510,7 +541,7 @@ public class ImageGenerator {
      * @param question A question JSONObject of a report
      * @return
      */
-    private PieChart generatePieChart(JSONObject question) { //TODO: Build in some logging for error handling.
+    private PieChart generatePieChart(JSONObject question) { 
 	ObservableList<PieChart.Data> data;
 	PieChart chart;
 
@@ -608,17 +639,30 @@ public class ImageGenerator {
 	String questionId;
 
 	if (question == null) {
+	    log.debug("JSONObject question is null:");
 	    return false;
 	}
 
 	try {
 	    questionId = question.getString("question");
 	} catch (JSONException e) {
+	    log.debug("questionID isnt present in:");
 	    return false;
 	}
 	try {
 	    question.getString("view");
 	} catch (JSONException e) {
+	    log.debug("view isnt present in:");
+	    return false;
+	}
+	try{
+	    JSONObject result = question.getJSONObject("result");
+	    if(result.length() == 0){
+		log.debug("no result in:");
+		return false;
+	    }
+	} catch (JSONException e) {
+	    log.debug("result is null in:");
 	    return false;
 	}
 	return isValidSurveyQuestion(questionId);
@@ -635,15 +679,16 @@ public class ImageGenerator {
 	String questionType;
 
 	if (surveyQuestion == null) {
+	    log.debug("surveyQuestion is null for:");
 	    return false;
 	}
 
 	try {
 	    questionType = surveyQuestion.getString("type");
 	} catch (JSONException e) {
+	    log.debug("survey type isnt present for:");
 	    return false;
 	}
-
 	return isValidAnswerType(questionType);
     }
 
@@ -653,8 +698,11 @@ public class ImageGenerator {
      * @return
      */
     private boolean isValidAnswerType(String questionType) {
-
+	
 	JSONObject answerType = getAnswerType(questionType);
+	if(answerType == null){
+	    log.debug("answerType isnt present for:");
+	}
 	return answerType != null;
     }
 

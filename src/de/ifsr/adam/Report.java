@@ -207,9 +207,23 @@ public class Report {
      * @param stylesheetPath The path to the style sheet 
      * @return The preview scene with diagrams and stuff.
      */
-    public Scene generateImage(String surveyPath, String answerTypesPath, String stylesheetPath) {
+    public Scene generatePreview(String surveyPath, String answerTypesPath, String stylesheetPath) {
 	ImageGenerator gen = new ImageGenerator(surveyPath,answerTypesPath,stylesheetPath);
-	Scene scene = gen.generateImage(report);
+	Scene scene = gen.generatePreview(report);
 	return scene;
+    }
+    
+    /**
+     * Print the image of the diagrams to a specified PDF
+     * @param surveyPath
+     * @param answerTypesPath
+     * @param stylesheetPath
+     * @param filePath
+     * @return 
+     */
+    public boolean printToPDF(String surveyPath, String answerTypesPath, String stylesheetPath,
+	    String filePath){
+	ImageGenerator gen = new ImageGenerator(surveyPath,answerTypesPath,stylesheetPath);
+	return gen.generatePDF(report, filePath);
     }
 }

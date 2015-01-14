@@ -44,7 +44,8 @@ public class TestScene extends Application {
 	GridPane gridPane = new GridPane();
 	root.getChildren().add(gridPane);
 	ImageGenerator gen = new ImageGenerator(scene);
-	gen.generateImage(JSONStuff.importJSONArray(System.getProperty("user.dir") + "/resultReport.json"));
+	gen.generatePreview(JSONStuff.importJSONArray(System.getProperty("user.dir") + "/resultReport.json"));
+	gen.generatePDF(JSONStuff.importJSONArray(System.getProperty("user.dir") + "/resultReport.json"),"test.pdf");
 
 	stage.setScene(scene);
 	stage.show();

@@ -69,19 +69,10 @@
         "text": "Wie oft haben Sie bisher in diesem Semester in dieser V. gefehlt?", 
         "type": "number"
     }, 
-    {
-        "answers": [
-            "musste jobben", 
-            "war krank", 
-            "verhindert wegen einer anderen Veranstaltung", 
-            "verschlafen", 
-            "geringes Interesse", 
-            "verhindert wegen Gremienarbeit", 
-            "andere Gr\u00fcnde"
-        ], 
+    { 
         "name": "F15", 
         "text": "Warum haben Sie gefehlt?", 
-        "type": "?"
+        "type": "F15"
     }, 
     {
         "name": "F16_a", 
@@ -93,24 +84,15 @@
         "text": "Wie viele Stunden w\u00e4ren nach Ihrer Sch\u00e4tzung eigentlich notwendig?", 
         "type": "number"
     }, 
-    {
-        "answers": [
-            "Pflichtveranstaltung", 
-            "studium generale", 
-            "Scheinerwerb/ Klausur", 
-            "Stoff ist relevant f\u00fcr Zwischen- /Abschlusspr\u00fcfung", 
-            "aus pers\u00f6nlichem Interesse am Stoff", 
-            "wegen der Lehrperson", 
-            "andere Besuchsgr\u00fcnde"
-        ], 
+    { 
         "name": "F17", 
         "text": "Aus welchen Gr\u00fcnden besuchen Sie diese Vorlesung?", 
-        "type": "?"
+        "type": "F17"
     }, 
     {
         "name": "F18", 
         "text": "Die f\u00fcr die Vorlesung notwendige Literatur ist in der Bibliothek verf\u00fcgbar", 
-        "type": "correctness+"
+        "type": "correctness"
     }, 
     {
         "name": "F19", 
@@ -140,12 +122,12 @@
     {
         "name": "F21", 
         "text": "Die Lehrperson bietet ausreichend M\u00f6glichkeiten zu Beratung an.", 
-        "type": "binary+"
+        "type": "binary"
     }, 
     {
         "name": "F22", 
         "text": "Ich bin mit der Betreuung durch die Lehrperson zufrieden.", 
-        "type": "correctness+"
+        "type": "correctness"
     }, 
     {
         "name": "a6", 
