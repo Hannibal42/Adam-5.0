@@ -6,12 +6,12 @@
 }
 
 .chart-title {
-    -fx-alignment:top-left;
+    -fx-alignment:top-center;
     -fx-text-alignment:left;
     -fx-wrap-text:true;
     -fx-text-overrun:ellipsis;
     /*-fx-font:; */
-    /*-fx-font-size:; */
+    -fx-font-size: 3.0em; 
     -fx-underline:false;
     /*-fx-graphic:; */
     -fx-graphic-text-gap:4;
@@ -19,10 +19,20 @@
 }
 
 .axis {
-    -fx-font-size: 2.0em;
-    -fx-font-family: Tahoma;
+    -fx-tick-label-font-size: 3.0em;
+    -fx-label-font-size: 3.0em;
+    -fx-tick-length: 20;
+    -fx-minor-tick-length: 10; 
+}
+
+.axis-tick-mark{
+    -fx-stroke-width: 3;
+}
+
+.axis-label{
+    -fx-font-size: 3.0em;
 }
 
 .chart-pie-label {
-    -fx-pie-label-visible:false;
+    -fx-font-size: 3.0em;
 }

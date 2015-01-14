@@ -45,6 +45,6 @@ public final class Formats {
     public static final Integer DINA3_HEIGHT = 2480;
     public static final Integer DINA3_WIDTH = 1754;
 
-    public static final Integer DINA4_HEIGHT = 1754;
-    public static final Integer DINA4_WIDTH = 1240;
+    public static final Integer DINA4_HEIGHT = 1754 * 2;
+    public static final Integer DINA4_WIDTH = 1240 * 2;
 }

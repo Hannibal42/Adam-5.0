@@ -564,6 +564,7 @@ public class ImageGenerator {
 
 	    chart = new PieChart(data);
 	    chart.setTitle(surveyQuestion.getString("text"));
+	    chart.setLegendVisible(false);
 	} catch (JSONException e) {
 	    log.error(e);
 	    return null;
