@@ -29,6 +29,10 @@ package de.ifsr.adam;
  */
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
 
 import org.apache.log4j.Logger;
 
@@ -148,4 +152,144 @@ public class DBController {
 	}
 	return tableNames;
     }
+    
+    /**
+     * Warning: This function only works on tables with INTEGER as column type.
+     * @param tableName the table you want to operate on.
+     * @return the column names of a table
+     */
+    private ArrayList<String> getColumnNames(String tableName){
+	initDBConnection();
+	String query = "SELECT sql FROM sqlite_master "
+	    + "WHERE tbl_name ='" + tableName + "' AND type='table';";
+	ArrayList<String> columnNames = new ArrayList<>();
+	try{
+	    Statement stmt = connection.createStatement();
+	    ResultSet resultSet = stmt.executeQuery(query);
+	    resultSet.next();
+	    String columnName = resultSet.getString(1);
+	    columnName = columnName.substring(columnName.indexOf("(")+1,columnName.length()-1); //Removes everything outside the brackets
+	    columnName = columnName.replace("INTEGER", ""); //Removes the column type INTEGER
+	    columnName = columnName.replace(" ", ""); //Removes spaces
+	    columnNames = new ArrayList(Arrays.asList(columnName.split(",")));
+	} catch (Exception e) {
+	    log.error(e);
+	}
+	
+	return columnNames;
+    }
+    
+    /**
+     * Normalizes the tabels into one format. Each questions is represented by one column with
+     * values 1-n that represent the possible answers.
+     */
+    public void normalizeTables(){
+	Iterator<String> tableNames = getTableNames().iterator();
+	while(tableNames.hasNext()){
+	    String tableName = tableNames.next();
+	    normalizeTable(tableName);
+	    }
+	}
+   
+    
+    /**
+     * Normalizes the specified table
+     * @param tableName 
+     */
+    public void normalizeTable(String tableName){
+	ArrayList<String> columnNames = getColumnNames(tableName);
+	for (int i = 0; i < columnNames.size(); i++) {
+	    String columnName = columnNames.get(i);
+	    String prefix;
+	    
+	    try{
+		prefix = columnName.substring(0,columnName.indexOf("_"));//Gets the prefix of the columnName
+		
+	    } catch (StringIndexOutOfBoundsException e){
+		prefix = " "; //Causes the while loop to fail
+	    }
+	    
+	    ArrayList<String> toBejoined = new ArrayList<>();
+	    int k = 1;
+	    while(columnName.startsWith(prefix) && (i+k) < columnNames.size()){
+		toBejoined.add(columnName);
+		columnName = columnNames.get(i+k);
+		k++;
+	    }
+	    
+	    if(toBejoined.size() > 1){
+		joinColumns(toBejoined, tableName, prefix);
+		i = i + k - 2; //Jumps to the next index behind the columns that get joined
+	    }
+	}
+    }
+    
+    /** TODO: Fix
+     * Joins the specified columns into one. Input:[F15_1,15,_2,15_3] Output: F15
+     * @param columnNames 
+     * @param tableName 
+     * @param newColumnName the name of the new column
+     */
+    private void joinColumns(ArrayList<String> columnNames, String tableName, String newColumnName){
+	initDBConnection();
+
+	try {	    
+	    Statement stmt = this.getStatement();
+	    stmt.execute("ALTER TABLE " + tableName + " ADD " + newColumnName + ";");
+	} catch (SQLException e) {
+	    //log.debug(e); TODO: Do I need login for this?
+	}
+	
+	String query = "SELECT ";
+	Iterator<String> iter = columnNames.iterator();
+	while(iter.hasNext()){
+	    query += iter.next() + ", ";
+	}
+	//query = query.substring(0, query.length()-2); //Removes ", " from the end of the string;
+	query += "rowid FROM " + tableName;
+	
+	try {
+	    setAutoCommit(false);
+	    String updateQuery = "UPDATE " + tableName + " SET " + newColumnName + "=?"+ 
+		    " WHERE rowid=?;";
+	    
+	    PreparedStatement prepStmt = this.getPreparedStatement(updateQuery); //TODO: Index einstellen
+	    Statement stmt = this.getStatement();
+	    ResultSet resultSet = stmt.executeQuery(query);
+	    while(resultSet.next()){
+		int value;
+		prepStmt.setInt(2, resultSet.getInt("rowid"));
+		for(int i = 1; i <= columnNames.size()-1; i++){ //-1 so you dont end up in the rowid	
+		    value = resultSet.getInt(i);
+		    if(value == 1){
+			prepStmt.setInt(1, i);
+		    }
+		    System.out.println("Result: " + resultSet.getInt(i)+ ", " + resultSet.getInt("rowid")); //TODO: Remove
+		}
+		prepStmt.addBatch();
+	    }
+	    prepStmt.executeBatch();
+	    this.commit();
+	} catch(SQLException e) {
+	    log.error(e);
+	} finally {
+	    try{
+		setAutoCommit(true);
+	    } catch (SQLException e){
+		log.error(e);
+	    }
+	}
+    }
+
+    
+    public static void main(String[] args){
+	BasicConfigurator.configure();
+	Logger.getRootLogger().setLevel(Level.ALL);
+	DBController dbc = new DBController();
+	ArrayList<String> tableNames = dbc.getTableNames();
+	System.out.println(dbc.getColumnNames(tableNames.get(0)));
+	dbc.normalizeTables();
+    }
 }
+
+
