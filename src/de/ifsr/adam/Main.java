@@ -34,7 +34,6 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.apache.log4j.Logger;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -58,7 +57,7 @@ public class Main extends Application {
         
         try {
             String uristring = "file:" + System.getProperty("user.dir") + "/logo.png"; 
-            stage.getIcons().add(new Image(uristring));  //TODO: Can I do this in FXML? 
+            stage.getIcons().add(new Image(uristring));   
         }
         catch(Exception e){
             log.error("Icon not loaded",e);
@@ -73,13 +72,14 @@ public class Main extends Application {
     public static void main(String[] args) {
 	Properties properties = new Properties();
 	try {
-	    properties.load(new FileReader(new File("C:\\Users\\Simon\\Desktop\\Adam 5.0\\properties\\log4j.properties"))); //TODO: Make this dynamic.
+	    File propertiesFile = new File(System.getProperty("user.dir") + "\\log4j.properties");
+	    properties.load(new FileReader(propertiesFile));
 	} 
 	catch (IOException ex) {
 	    
 	    Logger.getRootLogger().setLevel(Level.ERROR);
 	}
-	properties.setProperty("log", System.getProperty("user.dir") + "\\log");
+	properties.setProperty("log", System.getProperty("user.dir") + "\\log"); //Sets the output folder for the file.
 	PropertyConfigurator.configure(properties); 
         launch(args);
     }

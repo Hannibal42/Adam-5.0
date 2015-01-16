@@ -282,6 +282,7 @@ public class DBController {
     }
 
     
+    /*
     public static void main(String[] args){
 	BasicConfigurator.configure();
 	Logger.getRootLogger().setLevel(Level.ALL);
@@ -289,7 +290,7 @@ public class DBController {
 	ArrayList<String> tableNames = dbc.getTableNames();
 	System.out.println(dbc.getColumnNames(tableNames.get(0)));
 	dbc.normalizeTables();
-    }
+    }*/
 }
 
 

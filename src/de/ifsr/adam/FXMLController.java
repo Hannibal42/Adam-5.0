@@ -24,11 +24,8 @@
 package de.ifsr.adam;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Properties;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -53,10 +50,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 /**
  * The Controller that holds all the functions called by the GUI
@@ -64,12 +58,12 @@ import org.apache.log4j.PropertyConfigurator;
  */
 public class FXMLController implements Initializable {
     static Logger log = Logger.getLogger(FXMLController.class.getName());
-    
-    
+   
     private final CSVReader reader = new CSVReader();
     private final File defaultDir = new File(System.getProperty("user.dir"));
     private final FileChooser importFileChooser = new FileChooser();
     private final FileChooser diagramReportChooser = new FileChooser();
+    private final FileChooser diagramPDFChooser = new FileChooser();
     private final FileChooser optionsJSONChooser = new FileChooser();
     private final FileChooser optionsCSSChooser = new FileChooser();
     private final DirectoryChooser importDirectoryChooser = new DirectoryChooser();
@@ -83,8 +77,10 @@ public class FXMLController implements Initializable {
     @FXML private TextField optionsSelectSurveyTextField;
     @FXML private TextField optionsSelectChartStyleTextField;
     @FXML private Text importActionTarget;
-    @FXML private Text diagramActionTarget;
-    @FXML private ChoiceBox<String> diagramSelectClassChoiceBox;
+    //@FXML private Text diagramActionTarget; TODO:Remove
+    @FXML private ChoiceBox<String> diagramSelectCourseChoiceBox;
+    @FXML private ChoiceBox<String> diagramSelectSurveyChoiceBox;
+    @FXML private ChoiceBox<String> diagramSelectAnswerTypesChoiceBox;
     @FXML private ScrollPane reportEditor;
     
     
@@ -115,22 +111,6 @@ public class FXMLController implements Initializable {
         }        
     }
     
-    @FXML private void handleOptionsSaveLogButtonAction(ActionEvent event) {
-	Properties properties = new Properties();
-	try {
-	    properties.load(new FileReader(new File("C:\\Users\\Simon\\Desktop\\Adam 5.0\\properties\\log4j.properties"))); //TODO: Make this dynamic.
-	} 
-	catch (IOException ex) {
-	    BasicConfigurator.configure();
-	    Logger.getRootLogger().setLevel(Level.ERROR);
-	}
-	properties.setProperty("log4j.appender.FILE.immediateFlush", "true");
-	properties.setProperty("log", System.getProperty("user.dir") + "\\log");
-	PropertyConfigurator.configure(properties);
-	properties.setProperty("log4j.appender.FILE.immediateFlush", "false");
-	PropertyConfigurator.configure(properties);
-    }
-    
     @FXML
     private void handleImportButtonAction(ActionEvent event){
         String dirPath = importSelectDirectoryTextField.getText();
@@ -148,15 +128,15 @@ public class FXMLController implements Initializable {
         if(!filePath.equals("")){
             importSingleFile(event);
         }
-        diagramSelectClassChoiceBox.setItems(this.getTableNames()); // Refresh the diagram table choice box
+        diagramSelectCourseChoiceBox.setItems(Utilities.getTableNames()); // Refresh the diagram table choice box
     }
     
     private void importSingleFile(ActionEvent event){
         importActionTarget.setText(" ");
 	String filePath = importSelectFileTextField.getText();
         
-	if (isFilePath(filePath)){
-            if(isCSVFile(filePath)){
+	if (Utilities.isFilePath(filePath)){
+            if(Utilities.isCSVFile(filePath)){
                 
 		if(reader.insertCSVFile(filePath)){        
                     importActionTarget.setFill(Color.BLUE);
@@ -184,7 +164,7 @@ public class FXMLController implements Initializable {
         importActionTarget.setText(" ");
 	String dirPath = importSelectDirectoryTextField.getText();
         
-	if (isDirectoryPath(dirPath)){
+	if (Utilities.isDirectoryPath(dirPath)){
 		if(reader.insertCSVDirectory(dirPath)){
                     importActionTarget.setFill(Color.BLUE);
                     importActionTarget.setText("Import successfull!");    
@@ -205,42 +185,73 @@ public class FXMLController implements Initializable {
     
     @FXML
     private void handleDiagramSaveButtonAction(ActionEvent event) {
-        
-        diagramActionTarget.setText(" ");
         String filePath = diagramSelectReportTextField.getText();
-        String tableName = diagramSelectClassChoiceBox.getValue();
-        Report report;
-        if(isFilePath(filePath)) {
-            if(isJSONFile(filePath)) {
-                report = new Report(filePath,tableName);
+        String tableName = diagramSelectCourseChoiceBox.getValue();
+        if(Utilities.isFilePath(filePath)) {
+            if(Utilities.isJSONFile(filePath)) {
+                //Creates the report results
+		Report report = new Report(filePath,tableName);
                 report.createResults();
                 
+		//Shows the save dialog
                 Stage stage = (Stage) root.getScene().getWindow();
-                File file = diagramReportChooser.showSaveDialog(stage);
-                report.writeReportToFile(new File(file.getAbsolutePath())); //TODO: Change this. A Diagram should be generated here.
+                File outputFile = diagramPDFChooser.showSaveDialog(stage);
                 
-		String surveyPath = optionsSelectSurveyTextField.getText();
-		String answerTypesPath = optionsSelectAnswerTypesTextField.getText();
+		//Setup
+		String surveyPath = defaultDir + "\\Surveys\\" + 
+			diagramSelectSurveyChoiceBox.getValue();
+		String answerTypesPath = defaultDir +"\\AnswerTypes\\" +
+			diagramSelectAnswerTypesChoiceBox.getValue();
 		String stylesheetPath = optionsSelectChartStyleTextField.getText();
-                Stage stage2 = new Stage();
-                stage2.setScene(report.generatePreview(surveyPath,answerTypesPath,stylesheetPath));
-		String pdfFilePath = filePath.substring(0, filePath.length() -5);
+                
+		String pdfFilePath = outputFile.getAbsolutePath();
 		report.printToPDF(surveyPath, answerTypesPath, stylesheetPath,pdfFilePath);
-                stage2.show();
                 
-                diagramActionTarget.setFill(Color.BLUE);
-                diagramActionTarget.setText("Diagrams generated!"); //TODO Add some succesfull test.
-                
-                file = new File(filePath);
+                File file = new File(filePath);
                 file = new File(file.getParent());
                 diagramReportChooser.setInitialDirectory(file);
             }
             else {
-                diagramActionTarget.setText("Not a JSON file!");
+		log.debug("Not a JSON file!"); //TODO: Dialog window
             }
         }
         else{
-            diagramActionTarget.setText("Not a valid file path!");
+	    log.debug("Not a valid file path!"); //TODO: Dialog window
+        }
+    }
+    
+    @FXML
+    private void handleDiagramPreviewButtonAction(ActionEvent event) {
+        String filePath = diagramSelectReportTextField.getText();
+        String tableName = diagramSelectCourseChoiceBox.getValue();
+        if(Utilities.isFilePath(filePath)) {
+            if(Utilities.isJSONFile(filePath)) {
+                //Creates the report results
+		Report report = new Report(filePath,tableName);
+                report.createResults();
+                
+		//Setup
+		String surveyPath = defaultDir + "\\Surveys\\" + 
+			diagramSelectSurveyChoiceBox.getValue();
+		String answerTypesPath = defaultDir +"\\AnswerTypes\\" +
+			diagramSelectAnswerTypesChoiceBox.getValue();
+		String stylesheetPath = optionsSelectChartStyleTextField.getText();
+                
+		//Generates the preview
+		Stage stage = new Stage();
+                stage.setScene(report.generatePreview(surveyPath,answerTypesPath,stylesheetPath));
+                stage.show();
+                
+                File file = new File(filePath);
+                file = new File(file.getParent());
+                diagramReportChooser.setInitialDirectory(file);
+            }
+            else {
+		log.debug("Not a JSON file!"); //TODO: Dialog window
+            }
+        }
+        else{
+	    log.debug("Not a valid file path!"); //TODO: Dialog window
         }
     }
     
@@ -274,46 +285,7 @@ public class FXMLController implements Initializable {
             if (file != null){
                 diagramSelectReportTextField.setText(file.getPath());
             }  
-    }
-    
-    private ObservableList<String> getTableNames() {
-        ObservableList<String> tableNames;
-        tableNames = FXCollections.observableList(DBController.getInstance().getTableNames());
-        return tableNames;      
-    }
-
-    /**
-     * Checks if the file ends with .CSV or .csv
-     * @param filePath 
-     */
-    private Boolean isCSVFile(String filePath) {
-        return (filePath.endsWith(".CSV") || filePath.endsWith(".csv"));
-    }
-
-    /**
-     * Checks if there is a file at the end of the path.
-     * @param filePath
-     */
-    private Boolean isFilePath(String filePath) {
-        File file = new File(filePath);
-        return file.isFile();
-    }
-    /**
-     * Checks if there is a directory at the end of the path.
-     * @param filePath
-     */
-    private Boolean isDirectoryPath(String dirPath){
-        File file = new File(dirPath);
-        return file.isDirectory();
-    }
-
-    /**
-     *  Checks if the file ends with .JSON or .json
-     * @param filePath 
-     */
-    private Boolean isJSONFile(String filePath) {
-        return filePath.endsWith(".JSON") || filePath.endsWith(".json");
-    }
+    }  
     
     @FXML
     private void handleReportNewReportButtonAction(ActionEvent event) {
@@ -383,6 +355,8 @@ public class FXMLController implements Initializable {
         jsonFilter = new ExtensionFilter("JSON Files(*.json)","*.json");
         ExtensionFilter cssFilter;
         cssFilter = new ExtensionFilter("CSS Files(*.css)","*.css");
+	ExtensionFilter pdfFilter;
+	pdfFilter = new ExtensionFilter("PDF Files(*.pdf)","*.pdf");
           
         //Import tab initialize
         importFileChooser.setInitialDirectory(defaultDir);
@@ -394,8 +368,13 @@ public class FXMLController implements Initializable {
         diagramReportChooser.setInitialDirectory(defaultDir);
         diagramReportChooser.setTitle("Choose a Report json");
         diagramReportChooser.getExtensionFilters().add(jsonFilter);
-        diagramSelectClassChoiceBox.setItems(this.getTableNames());
-        
+	diagramPDFChooser.setInitialDirectory(defaultDir);
+	diagramPDFChooser.setTitle("Save your report!");
+	diagramPDFChooser.getExtensionFilters().add(pdfFilter);
+        diagramSelectCourseChoiceBox.setItems(Utilities.getTableNames());
+	diagramSelectSurveyChoiceBox.setItems(Utilities.getAllJSONFiles(defaultDir + "\\Surveys"));
+        diagramSelectAnswerTypesChoiceBox.setItems(Utilities.getAllJSONFiles(defaultDir + "\\AnswerTypes"));
+	
         //Options tab initialize
         optionsJSONChooser.setInitialDirectory(defaultDir);
         optionsJSONChooser.setTitle("Choose as JSON file");
@@ -413,8 +392,7 @@ public class FXMLController implements Initializable {
 	ArrayList<String> diagramsArrayList = new ArrayList();
 	diagramsArrayList.add("bardiagram");
 	diagramsArrayList.add("cakediagram");
-	diagramObservableList = FXCollections.observableList(diagramsArrayList);
-       
+	diagramObservableList = FXCollections.observableList(diagramsArrayList);      
     }    
     
 }
